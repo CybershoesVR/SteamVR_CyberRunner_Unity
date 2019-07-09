@@ -166,6 +166,11 @@ public class PlayerMovement : MonoBehaviour
         impulseDuration = duration;
     }
 
+    public void SetSpeed(float newSpeed)
+    {
+        moveSpeed = newSpeed;
+    }
+
     private void OnDrawGizmosSelected()
     {
         //Draws a line in the editor where FindGround() will check for ground

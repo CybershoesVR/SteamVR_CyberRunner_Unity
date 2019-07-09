@@ -123,8 +123,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f8ef4ca205c3e64086fdeeb8d4dac0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speedMultiplier: 20
-  duration: 0.75
+  speedMultiplier: 25
+  fadeTime: 25
 --- !u!135 &7178417469006617545
 SphereCollider:
   m_ObjectHideFlags: 0

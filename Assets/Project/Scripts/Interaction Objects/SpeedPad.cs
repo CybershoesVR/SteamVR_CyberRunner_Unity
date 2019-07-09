@@ -6,7 +6,7 @@ public class SpeedPad : MonoBehaviour
 {
     //Boost is always in the forward direction of the pad
     [SerializeField] float speedMultiplier = 2;
-    [SerializeField] float duration = 0.5f;
+    [SerializeField] float fadeTime = 2;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -14,7 +14,7 @@ public class SpeedPad : MonoBehaviour
 
         if (player)
         {
-            player.TemporarySpeedBoost(transform.forward * speedMultiplier, duration);
+            player.SpeedBoost(transform.forward * speedMultiplier, fadeTime);
         }
     }
 }

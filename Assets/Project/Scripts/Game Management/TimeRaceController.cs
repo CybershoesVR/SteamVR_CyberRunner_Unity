@@ -3,19 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.IO;
 
 public class TimeRaceController : MonoBehaviour
 {
     //Variables
     #region
 
+    [SerializeField] float timeScoreMultiplier;
+
     [SerializeField] TextMeshProUGUI bestTimeText;
     [SerializeField] TextMeshProUGUI lastTimeText;
-    [SerializeField] TextMeshProUGUI playerTimeText;
+    [SerializeField] TextMeshProUGUI uiPlayerTimeText;
 
-    [SerializeField] TextMeshProUGUI bestCoinText;
-    [SerializeField] TextMeshProUGUI lastCoinText;
-    [SerializeField] TextMeshProUGUI playerCoinText;
+    [SerializeField] TextMeshProUGUI bestGemText;
+    [SerializeField] TextMeshProUGUI lastGemText;
+    [SerializeField] TextMeshProUGUI uiPlayerGemText;
+
+    [SerializeField] TextMeshProUGUI highscoreText;
+    [SerializeField] TextMeshProUGUI lastScoreText;
 
     private bool raceActive = false;
 
@@ -23,11 +29,14 @@ public class TimeRaceController : MonoBehaviour
     private float bestTime = 1000000; //Default Value set really high so a first best time can be achieved
     private float lastTime = 0;
 
-    private int coins = 0;
-    private int bestCoins = 0;
-    private int lastCoins = 0;
+    private int gems = 0;
+    private int bestGems = 0;
+    private int lastGems = 0;
 
-    private Coin[] coinObjects;
+    private float highscore = 0;
+    private float lastScore = 0;
+
+    private Coin[] gemObjects;
 
     #endregion
 
@@ -35,25 +44,25 @@ public class TimeRaceController : MonoBehaviour
     private void Start()
     {
         //Load Stats
-        lastTime = PlayerPrefs.GetFloat("LastTime", 0);
-        bestTime = PlayerPrefs.GetFloat("BestTime", 1000000);
-        lastCoins = PlayerPrefs.GetInt("LastCoins", 0);
-        bestCoins = PlayerPrefs.GetInt("BestCoins", 0);
+        //lastTime = PlayerPrefs.GetFloat("LastTime", 0);
+        //bestTime = PlayerPrefs.GetFloat("BestTime", 1000000);
+        //lastCrystals = PlayerPrefs.GetInt("LastCoins", 0);
+        //bestCrystals = PlayerPrefs.GetInt("BestCoins", 0);
 
         //Only display if values are not default
-        if (lastTime != 0)
-        {
-            lastTimeText.text = "Last Time: " + lastTime;
-        }
-        if (bestTime != 1000000)
-        {
-            bestTimeText.text = "Best Time: " + bestTime;
-        }
+        //if (lastTime != 0)
+        //{
+        //    lastTimeText.text = "Last Time: " + lastTime;
+        //}
+        //if (bestTime != 1000000)
+        //{
+        //    bestTimeText.text = "Best Time: " + bestTime;
+        //}
 
-        lastCoinText.text = "Last Coins: " + lastCoins;
-        bestCoinText.text = "Best Coins: " + bestCoins;
+        //lastCoinText.text = "Last Coins: " + lastCrystals;
+        //bestCoinText.text = "Best Coins: " + bestCrystals;
 
-        coinObjects = FindObjectsOfType<Coin>();
+        gemObjects = FindObjectsOfType<Coin>();
     }
 
     private void Update()
@@ -62,14 +71,15 @@ public class TimeRaceController : MonoBehaviour
         if (raceActive)
         {
             time += Time.deltaTime;
-            lastTimeText.text = "Last Time: " + time;
-            playerTimeText.text = "Time: " + time;
+            uiPlayerTimeText.text = "Time: " + time;
         }
     }
 
     public void StartRace()
     {
         time = 0;
+        gems = 0;
+        uiPlayerGemText.text = "Gems: 0";
         raceActive = true;
     }
 
@@ -79,36 +89,44 @@ public class TimeRaceController : MonoBehaviour
         {
             raceActive = false;
             lastTime = time;
+            lastGems = gems;
 
-            if (time < bestTime)
+            lastScore = 1 / lastTime * timeScoreMultiplier + lastGems;
+
+            if (lastScore > highscore)
             {
-                bestTime = time;
+                highscore = lastScore;
+                bestTime = lastTime;
+                bestGems = lastGems;
             }
-
-            lastCoins = coins;
-
-            if (coins > bestCoins)
-            {
-                bestCoins = coins;
-            }
-
-            coins = 0;
 
             //Save Stats
-            PlayerPrefs.SetFloat("LastTime", lastTime);
-            PlayerPrefs.SetFloat("BestTime", bestTime);
-            PlayerPrefs.SetInt("LastCoins", lastCoins);
-            PlayerPrefs.SetInt("BestCoins", bestCoins);
+            //PlayerPrefs.SetFloat("LastTime", lastTime);
+            //PlayerPrefs.SetFloat("BestTime", bestTime);
+            //PlayerPrefs.SetInt("LastCoins", lastGems);
+            //PlayerPrefs.SetInt("BestCoins", bestGems);
+            FileStream stream = new FileStream(Application.dataPath + "/Assets/PlayerSave.bin", FileMode.Create);
+
+            BinaryWriter writer = new BinaryWriter(stream);
+
+            writer.Write(highscore);
+            writer.Write(bestTime);
+            writer.Write(bestGems);
+
+            writer.Close();
 
             //Display Stats
-            bestTimeText.text = "Best Time: " + bestTime;
-            lastTimeText.text = "Last Time: " + lastTime;
-            playerTimeText.text = "Time: " + lastTime;
-            bestCoinText.text = "Best Coins: " + bestCoins;
-            lastCoinText.text = "Last Coins: " + lastCoins;
-            playerCoinText.text = "Coins: " + lastCoins;
+            highscoreText.text = "Highscore: " + highscore;
+            bestTimeText.text = "Time: " + bestTime;
+            bestGemText.text = "Gems: " + bestGems;
 
-            foreach (Coin coin in coinObjects)
+            lastScoreText.text = "Score: " + lastScore;
+            lastTimeText.text = "Time: " + lastTime;
+            uiPlayerTimeText.text = "Time: " + lastTime;
+            lastGemText.text = "Gems: " + lastGems;
+            uiPlayerGemText.text = "Gems: " + lastGems;
+
+            foreach (Coin coin in gemObjects)
             {
                 coin.Respawn();
             }
@@ -122,21 +140,18 @@ public class TimeRaceController : MonoBehaviour
 
         if (lastTime != 0)
         {
-            lastTimeText.text = "Last Time: " + lastTime;
-            playerTimeText.text = "Time: " + lastTime;
+            lastTimeText.text = "Time: " + lastTime;
+            uiPlayerTimeText.text = "Time: " + lastTime;
         }
         else
         {
             lastTimeText.text = "Last Time: -";
-            playerTimeText.text = "Time: -";
+            uiPlayerTimeText.text = "Time: -";
         }
 
-        lastCoinText.text = "Last Coins: " + lastCoins;
-        playerCoinText.text = "Coins: " + lastCoins;
+        uiPlayerGemText.text = "Gems: " + lastGems;
 
-        coins = 0;
-
-        foreach (Coin coin in coinObjects)
+        foreach (Coin coin in gemObjects)
         {
             coin.Respawn();
         }
@@ -144,40 +159,39 @@ public class TimeRaceController : MonoBehaviour
 
     public void ResetStats()
     {
-        if (raceActive)
-        {
-            raceActive = false;
-            time = 0;
-        }
+        //if (raceActive)
+        //{
+        //    raceActive = false;
+        //    time = 0;
+        //}
 
-        lastTime = 0;
-        lastTimeText.text = "Last Time: -";
-        playerTimeText.text = "Time: -";
+        //lastTime = 0;
+        //lastTimeText.text = "Last Time: -";
+        //uiPlayerTimeText.text = "Time: -";
 
-        bestTime = 1000000;
-        bestTimeText.text = "Best Time: -";
+        //bestTime = 1000000;
+        //bestTimeText.text = "Best Time: -";
 
-        lastCoins = 0;
-        lastCoinText.text = "Last Coins: " + lastCoins;
-        playerCoinText.text = "Coins: " + lastCoins;
+        //lastGems = 0;
+        //lastGemText.text = "Last Coins: " + lastGems;
+        //uiPlayerGemText.text = "Coins: " + lastGems;
 
-        bestCoins = 0;
-        bestCoinText.text = "Best Coins: " + bestCoins;
+        //bestGems = 0;
+        //bestGemText.text = "Best Coins: " + bestGems;
 
-        //Save Stats
-        PlayerPrefs.SetFloat("LastTime", lastTime);
-        PlayerPrefs.SetFloat("BestTime", bestTime);
-        PlayerPrefs.SetInt("LastCoins", lastCoins);
-        PlayerPrefs.SetInt("BestCoins", bestCoins);
+        ////Save Stats
+        //PlayerPrefs.SetFloat("LastTime", lastTime);
+        //PlayerPrefs.SetFloat("BestTime", bestTime);
+        //PlayerPrefs.SetInt("LastCoins", lastGems);
+        //PlayerPrefs.SetInt("BestCoins", bestGems);
     }
 
     public void AddCoins(int amount)
     {
         if (raceActive)
         {
-            coins += amount;
-            lastCoinText.text = "Last Coins: " + coins;
-            playerCoinText.text = "Coins: " + coins;
+            gems += amount;
+            uiPlayerGemText.text = "Gems: " + gems;
         }
     }
 }

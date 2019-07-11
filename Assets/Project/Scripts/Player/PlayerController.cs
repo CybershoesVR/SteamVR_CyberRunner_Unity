@@ -19,7 +19,7 @@ public class PlayerController : MonoBehaviour
     //private SteamVR_Input_Sources rightHandSource = SteamVR_Input_Sources.RightHand;
 
     //private Transform activeHand;
-    private TimeRaceController raceController;
+    private RaceController raceController;
 
     //private bool handsEnabled = false;
 
@@ -27,7 +27,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         //activeHand = rightHand;
-        raceController = FindObjectOfType<TimeRaceController>();
+        raceController = FindObjectOfType<RaceController>();
     }
 
     //void Update()

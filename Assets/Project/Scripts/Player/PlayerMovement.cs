@@ -9,6 +9,8 @@ public class PlayerMovement : MonoBehaviour
     #region
 
     [SerializeField] float moveSpeed; //Keep the values low because of nausea. Less than 10 is optimal.
+    public float minSpeed;
+    public float maxSpeed;
     [SerializeField] float jumpForce; //Needs to be high (~500) depending on desired jump height.
     [SerializeField] bool flight = false;
     //[SerializeField] float impulseFade = 1; //Time an impulse needs to fade away
@@ -166,9 +168,28 @@ public class PlayerMovement : MonoBehaviour
         impulseDuration = duration;
     }
 
-    public void SetSpeed(float newSpeed)
+    public float SetSpeed(float newSpeed)
     {
         moveSpeed = newSpeed;
+        return moveSpeed;
+    }
+
+    public float AddSpeed(float amount)
+    {
+        float newSpeed = moveSpeed + amount;
+
+        if (newSpeed < minSpeed)
+        {
+            newSpeed = minSpeed;
+        }
+        else if (newSpeed > maxSpeed)
+        {
+            newSpeed = maxSpeed;
+        }
+
+        moveSpeed = newSpeed;
+
+        return moveSpeed;
     }
 
     private void OnDrawGizmosSelected()

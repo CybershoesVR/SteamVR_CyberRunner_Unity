@@ -35,22 +35,30 @@ public class UIInputToggle : MonoBehaviour
             if (activeHand == laserPointerLeft)
             {
                 activeHand.ToggleLaser(false);
+                pointerActive = false;
                 activeHand = laserPointerRight;
             }
 
-            activeHand.ToggleLaser(true);
-            pointerActive = true;
+            if (!pointerActive)
+            {
+                activeHand.ToggleLaser(true);
+                pointerActive = true;
+            }
         }
         else if (clickAction.GetState(SteamVR_Input_Sources.LeftHand))
         {
             if (activeHand == laserPointerRight)
             {
                 activeHand.ToggleLaser(false);
+                pointerActive = false;
                 activeHand = laserPointerLeft;
             }
 
-            activeHand.ToggleLaser(true);
-            pointerActive = true;
+            if (!pointerActive)
+            {
+                activeHand.ToggleLaser(true);
+                pointerActive = true;
+            }
         }
     }
 }

@@ -14,6 +14,7 @@ public class UILaserpointer : MonoBehaviour
     [SerializeField] SteamVR_Action_Boolean ClickAction;
 
     private bool active = false;
+    private bool triggerPressed = false;
 
     private LineRenderer laser;
     private Button selectedButton;
@@ -67,9 +68,20 @@ public class UILaserpointer : MonoBehaviour
             laser.SetPosition(1, laserTarget);
 
 
-            if (ClickAction.GetState(pointerObject) && selectedButton != null)
+            Debug.Log(triggerPressed);
+
+            if (ClickAction.GetState(pointerObject))
             {
-                selectedButton.onClick.Invoke();
+                if (!triggerPressed && selectedButton != null)
+                {
+                    selectedButton.onClick.Invoke();
+                }
+
+                triggerPressed = true;
+            }
+            else
+            {
+                triggerPressed = false;
             }
         }
     }
@@ -78,6 +90,7 @@ public class UILaserpointer : MonoBehaviour
     public void ToggleLaser(bool isActive)
     {
         active = isActive;
+        triggerPressed = false;
         laser.SetPosition(0, transform.position);
         laser.SetPosition(1, transform.position + (transform.forward * laserLength));
         laser.enabled = isActive;

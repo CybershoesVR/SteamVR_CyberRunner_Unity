@@ -10,6 +10,7 @@ public class Coin : MonoBehaviour
     private MeshRenderer meshRenderer;
     private SphereCollider coinCollider;
     private ParticleSystem collectParticles;
+    private AudioSource source;
 
 
     void Start()
@@ -17,6 +18,7 @@ public class Coin : MonoBehaviour
         meshRenderer = GetComponentInChildren<MeshRenderer>();
         coinCollider = GetComponent<SphereCollider>();
         collectParticles = GetComponentInChildren<ParticleSystem>();
+        source = GetComponent<AudioSource>();
     }
 
     void OnTriggerEnter(Collider other)
@@ -29,6 +31,7 @@ public class Coin : MonoBehaviour
             coinCollider.enabled = false;
             meshRenderer.enabled = false;
             collectParticles.Play();
+            source.Play();
         }
     }
 

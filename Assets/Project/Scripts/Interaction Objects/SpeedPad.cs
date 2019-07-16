@@ -8,6 +8,14 @@ public class SpeedPad : MonoBehaviour
     [SerializeField] float speedMultiplier = 2;
     [SerializeField] float fadeTime = 2;
 
+    private AudioSource source;
+
+
+    private void Start()
+    {
+        source = GetComponent<AudioSource>();
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         PlayerMovement player = other.transform.root.GetComponent<PlayerMovement>();
@@ -15,6 +23,7 @@ public class SpeedPad : MonoBehaviour
         if (player)
         {
             player.SpeedBoost(transform.forward * speedMultiplier, fadeTime);
+            source.Play();
         }
     }
 }

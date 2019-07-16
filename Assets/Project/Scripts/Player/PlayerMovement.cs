@@ -8,12 +8,15 @@ public class PlayerMovement : MonoBehaviour
     //Variables
     #region
 
-    [SerializeField] float moveSpeed; //Keep the values low because of nausea. Less than 10 is optimal.
+    [SerializeField] float moveSpeed = 10; //Keep the values low because of nausea.
+    [SerializeField] float sprintFactor;
+    [SerializeField] float sprintTrigger = 0.7f;
     public float minSpeed;
     public float maxSpeed;
     [SerializeField] float jumpForce; //Needs to be high (~500) depending on desired jump height.
+    [SerializeField] float jumpPush = 5f;
+    [SerializeField] float jumpPushDuration = 10f;
     [SerializeField] bool flight = false;
-    //[SerializeField] float impulseFade = 1; //Time an impulse needs to fade away
     [Space]
     [SerializeField] CapsuleCollider playerCollider;
     [Space]
@@ -29,9 +32,16 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float slopeRayHeight;
     [SerializeField] float maxSlopeSteepness;
     [SerializeField] float slopeThreshold = 0.01f;
+    [Space]
+    [SerializeField] AudioClip stepSound;
+    [SerializeField] AudioClip jumpSound;
+    [SerializeField] float stepTimeout;
 
     //To read the bool from the jump action an input source is needed.
     private SteamVR_Input_Sources jumpSource = SteamVR_Input_Sources.Any;
+
+    private AudioSource playerSource;
+    private float stepTimer = 0;
 
     private Vector3 externalImpulse; //Used for Boost Pads. Fades away as defined by impulseFade.
     private float impulseTimer;
@@ -47,6 +57,7 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        playerSource = GetComponent<AudioSource>();
         colliderTransform = playerCollider.transform;
 
         if (flight)
@@ -64,6 +75,9 @@ public class PlayerMovement : MonoBehaviour
         {
             isJumping = true;
             rb.AddForce(Vector3.up * jumpForce);
+            playerSource.clip = jumpSound;
+            playerSource.Play();
+            //SpeedBoost((rb.velocity.normalized - (Vector3.up * rb.velocity.normalized.y)) * jumpPush, jumpPushDuration);
         }
     }
 
@@ -78,6 +92,25 @@ public class PlayerMovement : MonoBehaviour
 
         //MOVEMENT
 
+        if (stepTimer > 0)
+        {
+            stepTimer -= Time.fixedDeltaTime;
+        }
+
+        //if (moveAction.axis.magnitude > 0.1f && stepTimer <= 0 && isGrounded)
+        //{
+        //    stepTimer = stepTimeout;
+
+        //    Debug.Log(stepTimer);
+
+        //    if (playerSource.clip != stepSound)
+        //    {
+        //        playerSource.clip = stepSound;
+        //    }
+
+        //    playerSource.Play();
+        //}
+
         float forward = moveAction.axis.y;
         float sideways = moveAction.axis.x;
 
@@ -85,18 +118,25 @@ public class PlayerMovement : MonoBehaviour
         Vector3 hmdDirectionForward = hmdCamera.forward - new Vector3(0, hmdCamera.forward.y, 0);
         Vector3 hmdDirectionRight = hmdCamera.right - new Vector3(0, hmdCamera.right.y, 0);
 
+        float sprintMultiplier = 1;
+
+        if (moveAction.axis.magnitude >= sprintTrigger)
+        {
+            sprintMultiplier = sprintFactor;
+        }
+
         //Sets the velocity relative to the Headset
         //Y velocity is assigned to itself to not cancel out gravitation.
         Vector3 newVelocity;
 
         if (!flight)
         {
-            newVelocity = ((hmdDirectionForward * forward + hmdDirectionRight * sideways) * moveSpeed) + externalImpulse;
+            newVelocity = ((hmdDirectionForward * forward + hmdDirectionRight * sideways) * (moveSpeed * sprintMultiplier)) + externalImpulse;
             newVelocity.y = rb.velocity.y + externalImpulse.y;
         }
         else
         {
-            newVelocity = ((hmdCamera.forward * forward + hmdDirectionRight * sideways) * moveSpeed) + externalImpulse;
+            newVelocity = ((hmdCamera.forward * forward + hmdDirectionRight * sideways) * (moveSpeed * sprintMultiplier)) + externalImpulse;
         }
 
         if (SlopesFlat(transform.position, new Vector3(newVelocity.x, 0, newVelocity.z), 10f)) // filter the y out, so it only checks forward... could get messy with the cosine otherwise.
@@ -104,6 +144,7 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = newVelocity;
         }
 
+        
         //Vector Rotation Table (For Reference)
         #region
         //(0  ,0,1  ) <> (0  ,1)   = (0  ,0,1  )

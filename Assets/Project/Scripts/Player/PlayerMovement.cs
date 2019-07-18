@@ -14,15 +14,16 @@ public class PlayerMovement : MonoBehaviour
     public float minSpeed;
     public float maxSpeed;
     [SerializeField] float jumpForce; //Needs to be high (~500) depending on desired jump height.
-    [SerializeField] float jumpPush = 5f;
-    [SerializeField] float jumpPushDuration = 10f;
     [SerializeField] bool flight = false;
     [Space]
     [SerializeField] CapsuleCollider playerCollider;
     [Space]
     [SerializeField] Transform hmdCamera; //Reference to the Headset Transform
     [SerializeField] SteamVR_Action_Vector2 moveAction;
+    [SerializeField] SteamVR_Action_Vector2 moveRawAction;
     [SerializeField] SteamVR_Action_Boolean jumpAction;
+    [SerializeField] SteamVR_Input_Sources treadmillSource = SteamVR_Input_Sources.Treadmill;
+    [SerializeField] SteamVR_Input_Sources handSource = SteamVR_Input_Sources.LeftHand;
     [Space]
     //Used for locating ground below the player so they can't jump mid-air.
     [SerializeField] Transform groundCheckStart; //A point at the bottom of the player
@@ -33,15 +34,13 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float maxSlopeSteepness;
     [SerializeField] float slopeThreshold = 0.01f;
     [Space]
-    [SerializeField] AudioClip stepSound;
-    [SerializeField] AudioClip jumpSound;
-    [SerializeField] float stepTimeout;
+    [SerializeField] private SteamVR_Input_Sources currentInputSource;
+    [Space]
+    [SerializeField] AudioSource leftFootAudioSource;
+    [SerializeField] AudioSource rightFootAudioSource;
 
-    //To read the bool from the jump action an input source is needed.
-    private SteamVR_Input_Sources jumpSource = SteamVR_Input_Sources.Any;
-
-    private AudioSource playerSource;
-    private float stepTimer = 0;
+    private AudioSource jumpAudioSource;
+    private bool rightFoot = true;
 
     private Vector3 externalImpulse; //Used for Boost Pads. Fades away as defined by impulseFade.
     private float impulseTimer;
@@ -56,8 +55,10 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
+        //currentSource = handSource;
+
         rb = GetComponent<Rigidbody>();
-        playerSource = GetComponent<AudioSource>();
+        jumpAudioSource = GetComponent<AudioSource>();
         colliderTransform = playerCollider.transform;
 
         if (flight)
@@ -71,13 +72,24 @@ public class PlayerMovement : MonoBehaviour
         isGrounded = FindGround();
 
         //JUMP
-        if (jumpAction.GetState(jumpSource) && isGrounded && !isJumping)
+        if (jumpAction.GetState(currentInputSource) && isGrounded && !isJumping)
         {
             isJumping = true;
             rb.AddForce(Vector3.up * jumpForce);
-            playerSource.clip = jumpSound;
-            playerSource.Play();
-            //SpeedBoost((rb.velocity.normalized - (Vector3.up * rb.velocity.normalized.y)) * jumpPush, jumpPushDuration);
+            jumpAudioSource.Play();
+        }
+
+        //Test Switch of input source
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (currentInputSource == handSource)
+            {
+                currentInputSource = treadmillSource;
+            }
+            else
+            {
+                currentInputSource = handSource;
+            }
         }
     }
 
@@ -92,27 +104,24 @@ public class PlayerMovement : MonoBehaviour
 
         //MOVEMENT
 
-        if (stepTimer > 0)
+        if (moveRawAction.axis.magnitude > 0.7f && isGrounded)
         {
-            stepTimer -= Time.fixedDeltaTime;
+            //Debug.Log(moveRawAction.axis.magnitude);
+
+            if (rightFoot && !rightFootAudioSource.isPlaying)
+            {
+                rightFootAudioSource.Play();
+            }
+            else if (!rightFoot && !leftFootAudioSource.isPlaying)
+            {
+                leftFootAudioSource.Play();
+            }
+
+            rightFoot = !rightFoot;
         }
 
-        //if (moveAction.axis.magnitude > 0.1f && stepTimer <= 0 && isGrounded)
-        //{
-        //    stepTimer = stepTimeout;
-
-        //    Debug.Log(stepTimer);
-
-        //    if (playerSource.clip != stepSound)
-        //    {
-        //        playerSource.clip = stepSound;
-        //    }
-
-        //    playerSource.Play();
-        //}
-
-        float forward = moveAction.axis.y;
-        float sideways = moveAction.axis.x;
+        float forward = moveAction.GetAxis(currentInputSource).y;
+        float sideways = moveAction.GetAxis(currentInputSource).x;
 
         //Y is cancelled out here because we don't want any height values.
         Vector3 hmdDirectionForward = hmdCamera.forward - new Vector3(0, hmdCamera.forward.y, 0);
@@ -144,14 +153,6 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = newVelocity;
         }
 
-        
-        //Vector Rotation Table (For Reference)
-        #region
-        //(0  ,0,1  ) <> (0  ,1)   = (0  ,0,1  )
-        //(0.5,0,0.5) <> (0  ,1)   = (0.5,0,0.5)
-        //(0.5,0,0.5) <> (0.5,0,5) = (1  ,0,0  )
-        #endregion
-
         if (externalImpulse.magnitude > 0)
         {
             impulseTimer += Time.fixedDeltaTime / impulseDuration;
@@ -165,7 +166,7 @@ public class PlayerMovement : MonoBehaviour
         bool hit = Physics.Linecast(groundCheckStart.position, groundCheckStart.position + (Vector3.down * groundLinecastLength), groundMask);
 
         //Disable isJumping on impact
-        if (hit && isJumping && !jumpAction.GetState(jumpSource))
+        if (hit && isJumping && !jumpAction.GetState(currentInputSource))
         {
             isJumping = false;
         }

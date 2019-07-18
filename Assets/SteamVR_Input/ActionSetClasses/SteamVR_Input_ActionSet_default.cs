@@ -89,19 +89,11 @@ namespace Valve.VR
             }
         }
         
-        public virtual SteamVR_Action_Vector2 MoveTrackpad
+        public virtual SteamVR_Action_Vector2 Move
         {
             get
             {
-                return SteamVR_Actions.default_MoveTrackpad;
-            }
-        }
-        
-        public virtual SteamVR_Action_Vector2 MoveTreadmill
-        {
-            get
-            {
-                return SteamVR_Actions.default_MoveTreadmill;
+                return SteamVR_Actions.default_Move;
             }
         }
         
@@ -110,6 +102,14 @@ namespace Valve.VR
             get
             {
                 return SteamVR_Actions.default_Jump;
+            }
+        }
+        
+        public virtual SteamVR_Action_Vector2 MoveRaw
+        {
+            get
+            {
+                return SteamVR_Actions.default_MoveRaw;
             }
         }
         

@@ -41,16 +41,16 @@
       "requirement": "optional"
     },
     {
-      "name": "/actions/default/in/MoveTrackpad",
-      "type": "vector2"
-    },
-    {
-      "name": "/actions/default/in/MoveTreadmill",
+      "name": "/actions/default/in/Move",
       "type": "vector2"
     },
     {
       "name": "/actions/default/in/Jump",
       "type": "boolean"
+    },
+    {
+      "name": "/actions/default/in/MoveRaw",
+      "type": "vector2"
     },
     {
       "name": "/actions/default/out/Haptic",

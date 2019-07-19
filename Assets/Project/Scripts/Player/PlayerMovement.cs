@@ -76,19 +76,10 @@ public class PlayerMovement : MonoBehaviour
         {
             isJumping = true;
             rb.AddForce(Vector3.up * jumpForce);
-            jumpAudioSource.Play();
-        }
 
-        //Test Switch of input source
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (currentInputSource == handSource)
+            if (rb.constraints == RigidbodyConstraints.FreezeRotation)
             {
-                currentInputSource = treadmillSource;
-            }
-            else
-            {
-                currentInputSource = handSource;
+                jumpAudioSource.Play();
             }
         }
     }
@@ -148,7 +139,7 @@ public class PlayerMovement : MonoBehaviour
             newVelocity = ((hmdCamera.forward * forward + hmdDirectionRight * sideways) * (moveSpeed * sprintMultiplier)) + externalImpulse;
         }
 
-        if (SlopesFlat(transform.position, new Vector3(newVelocity.x, 0, newVelocity.z), 10f)) // filter the y out, so it only checks forward... could get messy with the cosine otherwise.
+        if (SlopesFlat(groundCheckStart.position, new Vector3(newVelocity.x, 0, newVelocity.z), 10f)) // filter the y out, so it only checks forward... could get messy with the cosine otherwise.
         {
             rb.velocity = newVelocity;
         }
@@ -232,6 +223,18 @@ public class PlayerMovement : MonoBehaviour
         moveSpeed = newSpeed;
 
         return moveSpeed;
+    }
+
+    public void SwitchController(bool cybershoesActive)
+    {
+        if (cybershoesActive)
+        {
+            currentInputSource = treadmillSource;
+        }
+        else
+        {
+            currentInputSource = handSource;
+        }
     }
 
     private void OnDrawGizmosSelected()

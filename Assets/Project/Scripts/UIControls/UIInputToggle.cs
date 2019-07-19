@@ -5,14 +5,18 @@ using Valve.VR;
 
 public class UIInputToggle : MonoBehaviour
 {
+    [SerializeField] SteamVR_Action_Boolean openMenuAction;
+    [SerializeField] SteamVR_Input_Sources menuHand = SteamVR_Input_Sources.LeftHand;
+    [SerializeField] GameObject menuObject;
+    [Space]
     [SerializeField] UILaserpointer laserPointerLeft;
     [SerializeField] UILaserpointer laserPointerRight;
-
     [SerializeField] SteamVR_Action_Boolean clickAction;
 
     private Rigidbody playerRB;
     private UILaserpointer activeHand;
     private bool pointerActive = true;
+    private bool menuPressed = false;
 
 
     private void Start()
@@ -24,6 +28,25 @@ public class UIInputToggle : MonoBehaviour
 
     private void Update()
     {
+        if (openMenuAction.GetState(menuHand))
+        {
+            if (!menuPressed)
+            {
+                menuPressed = true;
+                menuObject.SetActive(!menuObject.activeSelf);
+
+                if (menuObject.activeSelf && activeHand == laserPointerLeft && pointerActive)
+                {
+                    activeHand.ToggleLaser(false);
+                    pointerActive = false;
+                }
+            }
+        }
+        else if (menuPressed)
+        {
+            menuPressed = false;
+        }
+
         if (pointerActive && playerRB.velocity.magnitude > 3)
         {
             activeHand.ToggleLaser(false);
@@ -54,7 +77,7 @@ public class UIInputToggle : MonoBehaviour
                 activeHand = laserPointerLeft;
             }
 
-            if (!pointerActive)
+            if (!pointerActive && !menuObject.activeSelf)
             {
                 activeHand.ToggleLaser(true);
                 pointerActive = true;

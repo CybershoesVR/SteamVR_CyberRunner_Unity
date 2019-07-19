@@ -23,4 +23,14 @@ public class PlayerFreezer : MonoBehaviour
             playerRB.constraints = RigidbodyConstraints.FreezeRotation;
         }
     }
+
+    public void TimedFreeze(float delay)
+    {
+        Invoke("DirectFreeze", delay);
+    }
+
+    void DirectFreeze()
+    {
+        playerRB.constraints = RigidbodyConstraints.FreezeAll;
+    }
 }

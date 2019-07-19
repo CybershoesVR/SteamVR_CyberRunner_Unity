@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Valve.VR;
 
 public class Teleporter : MonoBehaviour
 {
-    [SerializeField]
-    Transform spawnPoint;
-    [SerializeField]
-    Animator effectCanvas;
-    [SerializeField]
-    float darkTime = 2;
+    [SerializeField] Transform spawnPoint;
+    //[SerializeField]
+    //Animator effectCanvas;
+    [SerializeField] float fadeDuration = 2;
 
     private Transform player;
 
@@ -22,16 +21,17 @@ public class Teleporter : MonoBehaviour
 
     public void Teleport()
     {
-        effectCanvas.SetTrigger("Fade");
-        StartCoroutine(TpAfterFade());
+        //effectCanvas.SetTrigger("Fade");
+        SteamVR_Fade.Start(Color.black, fadeDuration);
+        Invoke("TpAfterFade", fadeDuration);
     }
 
-    IEnumerator TpAfterFade()
+    void TpAfterFade()
     {
-        yield return new WaitForSeconds(darkTime);
-
         player.position = spawnPoint.position;
 
-        effectCanvas.SetTrigger("Fade");
+        SteamVR_Fade.Start(Color.clear, fadeDuration);
+
+        //effectCanvas.SetTrigger("Fade");
     }
 }

@@ -15,13 +15,18 @@ public class RaceController : MonoBehaviour
     [SerializeField] TextMeshProUGUI bestTimeText;
     [SerializeField] TextMeshProUGUI lastTimeText;
     [SerializeField] TextMeshProUGUI uiPlayerTimeText;
-
+    [Space]
     [SerializeField] TextMeshProUGUI bestGemText;
     [SerializeField] TextMeshProUGUI lastGemText;
     [SerializeField] TextMeshProUGUI uiPlayerGemText;
-
+    [Space]
     [SerializeField] TextMeshProUGUI highscoreText;
     [SerializeField] TextMeshProUGUI lastScoreText;
+    [Space]
+    [SerializeField] float finishTimeout = 1f;
+
+    private FinishBoard finishBoard;
+    private TextMeshProUGUI highscoreInfo;
 
     private bool raceActive = false;
 
@@ -51,12 +56,15 @@ public class RaceController : MonoBehaviour
         //Only display if values are not default
         if (highscore != 0)
         {
-            highscoreText.text = "Highscore: " + highscore;
-            bestTimeText.text = "Time: " + bestTime;
-            bestGemText.text = "Gems: " + bestGems;
+            highscoreText.text = $"Highscore: {highscore:#0.00}";
+            bestTimeText.text = $"Time: {bestTime:#0.000}";
+            bestGemText.text = $"Gems: {bestGems}";
         }
 
         gemObjects = FindObjectsOfType<Coin>();
+
+        finishBoard = FindObjectOfType<FinishBoard>();
+        highscoreInfo = finishBoard.GetComponentInChildren<TextMeshProUGUI>();
     }
 
     private void Update()
@@ -65,7 +73,7 @@ public class RaceController : MonoBehaviour
         if (raceActive)
         {
             time += Time.deltaTime;
-            uiPlayerTimeText.text = "Time: " + time;
+            uiPlayerTimeText.text = $"{time:#0.000}";
         }
     }
 
@@ -73,7 +81,7 @@ public class RaceController : MonoBehaviour
     {
         time = 0;
         gems = 0;
-        uiPlayerGemText.text = "Gems: 0";
+        uiPlayerGemText.text = "0";
         raceActive = true;
     }
 
@@ -92,21 +100,29 @@ public class RaceController : MonoBehaviour
                 highscore = lastScore;
                 bestTime = lastTime;
                 bestGems = lastGems;
+
+                highscoreInfo.text = "New Highscore!!!";
             }
+            else
+            {
+                highscoreInfo.text = "Too slow!!!";
+            }
+
+            finishBoard.Popup(finishTimeout);
 
             //Save Stats
             SaveStats();
 
             //Display Stats
-            highscoreText.text = "Highscore: " + highscore;
-            bestTimeText.text = "Time: " + bestTime;
-            bestGemText.text = "Gems: " + bestGems;
+            highscoreText.text = $"Highscore: {highscore:#0.00}";
+            bestTimeText.text = $"Time: {bestTime:#0.000}";
+            bestGemText.text = $"Gems: {bestGems}";
 
-            lastScoreText.text = "Score: " + lastScore;
-            lastTimeText.text = "Time: " + lastTime;
-            uiPlayerTimeText.text = "Time: " + lastTime;
-            lastGemText.text = "Gems: " + lastGems;
-            uiPlayerGemText.text = "Gems: " + lastGems;
+            lastScoreText.text = $"Score: {lastScore:#0.00}";
+            lastTimeText.text = $"Time: {lastTime:#0.000}";
+            uiPlayerTimeText.text = $"{lastTime:#0.000}";
+            lastGemText.text = $"Gems: {lastGems}";
+            uiPlayerGemText.text = $"{lastGems}";
 
             foreach (Coin coin in gemObjects)
             {
@@ -122,13 +138,13 @@ public class RaceController : MonoBehaviour
 
         if (lastScore != 0)
         {
-            uiPlayerGemText.text = "Gems: " + lastGems;
-            uiPlayerTimeText.text = "Time: " + lastTime;
+            uiPlayerGemText.text = $"{lastGems}";
+            uiPlayerTimeText.text = $"{lastTime:#0.000}";
         }
         else
         {
-            uiPlayerTimeText.text = "Time: 0";
-            uiPlayerGemText.text = "Gems: 0";
+            uiPlayerTimeText.text = "0";
+            uiPlayerGemText.text = "0";
         }
 
         foreach (Coin gem in gemObjects)
@@ -154,10 +170,10 @@ public class RaceController : MonoBehaviour
         lastScore = 0;
 
         lastTimeText.text = "Time: -";
-        uiPlayerTimeText.text = "Time: -";
+        uiPlayerTimeText.text = "0.000";
         bestTimeText.text = "Time: -";
         lastGemText.text = "Gems: -";
-        uiPlayerGemText.text = "Gems: -";
+        uiPlayerGemText.text = "0";
         bestGemText.text = "Gems: -";
         highscoreText.text = "Highscore: -";
         lastScoreText.text = "Score: -";
@@ -213,7 +229,7 @@ public class RaceController : MonoBehaviour
         if (raceActive)
         {
             gems += amount;
-            uiPlayerGemText.text = "Gems: " + gems;
+            uiPlayerGemText.text = $"{gems}";
         }
     }
 }

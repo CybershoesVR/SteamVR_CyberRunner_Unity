@@ -25,6 +25,6 @@ public class PlayerController : MonoBehaviour
 
     public void AddCoins(int amount)
     {
-        raceController.AddCoins(amount);
+        raceController.AddGems(amount);
     }
 }

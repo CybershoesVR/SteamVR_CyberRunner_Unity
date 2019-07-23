@@ -295,15 +295,16 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_text: Exit Game
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 03d1a01075927ae45848668c91a3c265, type: 2}
+  m_sharedMaterial: {fileID: 8615842790145068126, guid: 03d1a01075927ae45848668c91a3c265,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4278229759
+  m_fontColor: {r: 1, g: 0.6055647, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -551,15 +552,16 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_text: Switch to Cybershoes Movement
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 03d1a01075927ae45848668c91a3c265, type: 2}
+  m_sharedMaterial: {fileID: 8615842790145068126, guid: 03d1a01075927ae45848668c91a3c265,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4278229759
+  m_fontColor: {r: 1, g: 0.6055647, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -835,15 +837,16 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_text: Switch to Controller Movement
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 03d1a01075927ae45848668c91a3c265, type: 2}
+  m_sharedMaterial: {fileID: 8615842790145068126, guid: 03d1a01075927ae45848668c91a3c265,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4278229759
+  m_fontColor: {r: 1, g: 0.6055647, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -938,8 +941,6 @@ GameObject:
   - component: {fileID: 1216167236}
   - component: {fileID: 1216167235}
   - component: {fileID: 1216167234}
-  - component: {fileID: 1216167233}
-  - component: {fileID: 1216167232}
   m_Layer: 5
   m_Name: SwitchToController
   m_TagString: Untagged
@@ -1095,32 +1096,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 80, y: 100, z: 5}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1216167233
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1216167230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b316680ee4a482b4a945c68394b53b0b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  spawnPoint: {fileID: 0}
-  fadeDuration: 1
---- !u!114 &1216167232
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1216167230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70e21eb9e05fdd745b8e80f56edd368e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1378380879
 GameObject:
   m_ObjectHideFlags: 0
@@ -1134,7 +1109,6 @@ GameObject:
   - component: {fileID: 1378380885}
   - component: {fileID: 1378380884}
   - component: {fileID: 1378380883}
-  - component: {fileID: 1378380882}
   - component: {fileID: 1378380881}
   m_Layer: 5
   m_Name: ExitGameButton
@@ -1160,8 +1134,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0.1}
-  m_SizeDelta: {x: 150, y: 30}
+  m_AnchoredPosition: {x: 0, y: 0.2}
+  m_SizeDelta: {x: 180, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1378380886
 CanvasRenderer:
@@ -1242,7 +1216,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1378380885}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1378380881}
+        m_MethodName: Quit
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!65 &1378380883
@@ -1256,22 +1241,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 150, y: 30, z: 5}
+  m_Size: {x: 180, y: 50, z: 5}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1378380882
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1378380879}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b316680ee4a482b4a945c68394b53b0b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  spawnPoint: {fileID: 0}
-  fadeDuration: 1
 --- !u!114 &1378380881
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1281,7 +1252,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1378380879}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70e21eb9e05fdd745b8e80f56edd368e, type: 3}
+  m_Script: {fileID: 11500000, guid: 51da1996c7917e446872cb5c33470ee6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1426083711
@@ -1572,8 +1543,6 @@ GameObject:
   - component: {fileID: 2006652655}
   - component: {fileID: 2006652654}
   - component: {fileID: 2006652653}
-  - component: {fileID: 2006652652}
-  - component: {fileID: 2006652651}
   m_Layer: 5
   m_Name: SwitchToCybershoes
   m_TagString: Untagged
@@ -1729,32 +1698,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 80, y: 100, z: 5}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &2006652652
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2006652649}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b316680ee4a482b4a945c68394b53b0b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  spawnPoint: {fileID: 0}
-  fadeDuration: 1
---- !u!114 &2006652651
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2006652649}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70e21eb9e05fdd745b8e80f56edd368e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &2089051245
 GameObject:
   m_ObjectHideFlags: 0
@@ -1822,8 +1765,9 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_text: New Highscore!
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 03d1a01075927ae45848668c91a3c265, type: 2}
+  m_sharedMaterial: {fileID: 8615842790145068126, guid: 03d1a01075927ae45848668c91a3c265,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2325,7 +2269,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1199311763568453283}
   serializedVersion: 2
-  m_Mass: 1
+  m_Mass: 3
   m_Drag: 0
   m_AngularDrag: 0.05
   m_UseGravity: 1
@@ -2350,15 +2294,20 @@ MonoBehaviour:
   sprintTrigger: 0.75
   minSpeed: 5
   maxSpeed: 20
-  jumpForce: 600
+  jumpForce: 15
+  jumpPush: 15
+  pushDuration: 1
   flight: 0
   playerCollider: {fileID: 2946316817854039036}
   hmdCamera: {fileID: 1201047455317056321}
   moveAction:
     actionPath: /actions/default/in/Move
     needsReinit: 0
-  moveRawAction:
-    actionPath: /actions/default/in/MoveRaw
+  moveRawLeftAction:
+    actionPath: /actions/default/in/MoveRawLeft
+    needsReinit: 0
+  moveRawRightAction:
+    actionPath: /actions/default/in/MoveRawRight
     needsReinit: 0
   jumpAction:
     actionPath: /actions/default/in/Jump
@@ -2388,11 +2337,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e77dfa9ea35e7c0468c2faba2e5e7216, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  openMenuAction:
-    actionPath: /actions/default/in/OpenMenu
-    needsReinit: 0
-  menuHand: 1
-  menuObject: {fileID: 891474807}
   colliderSource: {fileID: 712205134}
 --- !u!114 &1970005624
 MonoBehaviour:
@@ -2406,6 +2350,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc07257554923c9419e0d8abb4ef4fc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  openMenuAction:
+    actionPath: /actions/default/in/OpenMenu
+    needsReinit: 0
+  menuHand: 1
+  menuObject: {fileID: 891474807}
   laserPointerLeft: {fileID: 374579773}
   laserPointerRight: {fileID: 174099852}
   clickAction:
@@ -2746,7 +2695,7 @@ GameObject:
   - component: {fileID: 563546298}
   m_Layer: 9
   m_Name: Camera
-  m_TagString: Untagged
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

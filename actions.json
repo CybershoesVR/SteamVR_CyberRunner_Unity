@@ -49,12 +49,16 @@
       "type": "boolean"
     },
     {
-      "name": "/actions/default/in/MoveRaw",
+      "name": "/actions/default/in/MoveRawLeft",
       "type": "vector2"
     },
     {
       "name": "/actions/default/in/OpenMenu",
       "type": "boolean"
+    },
+    {
+      "name": "/actions/default/in/MoveRawRight",
+      "type": "vector2"
     },
     {
       "name": "/actions/default/out/Haptic",

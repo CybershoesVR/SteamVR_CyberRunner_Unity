@@ -4,25 +4,18 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.IO;
+using Steamworks;
 
 public class RaceController : MonoBehaviour
 {
     //Variables
     #region
 
-    [SerializeField] float timeScoreMultiplier;
-    [Space]
     [SerializeField] TextMeshProUGUI bestTimeText;
     [SerializeField] TextMeshProUGUI lastTimeText;
     [SerializeField] TextMeshProUGUI uiPlayerTimeText;
     [Space]
-    [SerializeField] TextMeshProUGUI bestGemText;
-    [SerializeField] TextMeshProUGUI lastGemText;
-    [SerializeField] TextMeshProUGUI uiPlayerGemText;
-    [Space]
-    [SerializeField] TextMeshProUGUI highscoreText;
-    [SerializeField] TextMeshProUGUI lastScoreText;
-    [Space]
+    [SerializeField] float timePerGem;
     [SerializeField] float finishTimeout = 1f;
 
     private FinishBoard finishBoard;
@@ -34,17 +27,13 @@ public class RaceController : MonoBehaviour
     private float bestTime = 1000000; //Default Value set really high so a first best time can be achieved
     private float lastTime = 0;
 
-    private int gems = 0;
-    private int bestGems = 0;
-    private int lastGems = 0;
-
-    private float highscore = 0;
-    private float lastScore = 0;
-
     private Coin[] gemObjects;
 
     private string scoreListPath;
     private FileStream stream;
+
+    private static SteamLeaderboard_t currentLeaderboard;
+    private static CallResult<LeaderboardFindResult_t> findResult = new CallResult<LeaderboardFindResult_t>();
 
     #endregion
 
@@ -54,11 +43,9 @@ public class RaceController : MonoBehaviour
         LoadStats();
 
         //Only display if values are not default
-        if (highscore != 0)
+        if (bestTime != 1000000)
         {
-            highscoreText.text = $"Highscore: {highscore:#0.00}";
-            bestTimeText.text = $"Time: {bestTime:#0.000}";
-            bestGemText.text = $"Gems: {bestGems}";
+            bestTimeText.text = $"{bestTime:#0.000} s";
         }
 
         gemObjects = FindObjectsOfType<Coin>();
@@ -80,8 +67,6 @@ public class RaceController : MonoBehaviour
     public void StartRace()
     {
         time = 0;
-        gems = 0;
-        uiPlayerGemText.text = "0";
         raceActive = true;
     }
 
@@ -91,15 +76,10 @@ public class RaceController : MonoBehaviour
         {
             raceActive = false;
             lastTime = time;
-            lastGems = gems;
 
-            lastScore = 1 / lastTime * timeScoreMultiplier + lastGems;
-
-            if (lastScore > highscore)
+            if (lastTime < bestTime)
             {
-                highscore = lastScore;
                 bestTime = lastTime;
-                bestGems = lastGems;
 
                 highscoreInfo.text = "New Highscore!!!";
             }
@@ -114,15 +94,10 @@ public class RaceController : MonoBehaviour
             SaveStats();
 
             //Display Stats
-            highscoreText.text = $"Highscore: {highscore:#0.00}";
-            bestTimeText.text = $"Time: {bestTime:#0.000}";
-            bestGemText.text = $"Gems: {bestGems}";
+            bestTimeText.text = $"{bestTime:#0.000} s";
 
-            lastScoreText.text = $"Score: {lastScore:#0.00}";
-            lastTimeText.text = $"Time: {lastTime:#0.000}";
+            lastTimeText.text = $"{lastTime:#0.000} s";
             uiPlayerTimeText.text = $"{lastTime:#0.000}";
-            lastGemText.text = $"Gems: {lastGems}";
-            uiPlayerGemText.text = $"{lastGems}";
 
             foreach (Coin coin in gemObjects)
             {
@@ -136,15 +111,13 @@ public class RaceController : MonoBehaviour
         time = 0;
         raceActive = false;
 
-        if (lastScore != 0)
+        if (lastTime != 0)
         {
-            uiPlayerGemText.text = $"{lastGems}";
             uiPlayerTimeText.text = $"{lastTime:#0.000}";
         }
         else
         {
-            uiPlayerTimeText.text = "0";
-            uiPlayerGemText.text = "0";
+            uiPlayerTimeText.text = "0.000";
         }
 
         foreach (Coin gem in gemObjects)
@@ -159,24 +132,14 @@ public class RaceController : MonoBehaviour
         {
             raceActive = false;
             time = 0;
-            gems = 0;
         }
 
         lastTime = 0;
         bestTime = 1000000;
-        lastGems = 0;
-        bestGems = 0;
-        highscore = 0;
-        lastScore = 0;
 
-        lastTimeText.text = "Time: -";
+        lastTimeText.text = "-";
         uiPlayerTimeText.text = "0.000";
-        bestTimeText.text = "Time: -";
-        lastGemText.text = "Gems: -";
-        uiPlayerGemText.text = "0";
-        bestGemText.text = "Gems: -";
-        highscoreText.text = "Highscore: -";
-        lastScoreText.text = "Score: -";
+        bestTimeText.text = "-";
 
         SaveStats();
     }
@@ -187,9 +150,7 @@ public class RaceController : MonoBehaviour
 
         BinaryWriter writer = new BinaryWriter(stream);
 
-        writer.Write(highscore);
         writer.Write(bestTime);
-        writer.Write(bestGems);
 
         stream.Flush();
         writer.Close();
@@ -212,9 +173,7 @@ public class RaceController : MonoBehaviour
 
             BinaryReader reader = new BinaryReader(stream);
 
-            highscore = reader.ReadSingle();
             bestTime = reader.ReadSingle();
-            bestGems = reader.ReadInt32();
 
             reader.Close();
         }
@@ -222,14 +181,34 @@ public class RaceController : MonoBehaviour
         {
             SaveStats();
         }
+
+        if (SteamManager.Initialized)
+        {
+            SteamAPICall_t steamAPICall = SteamUserStats.FindLeaderboard("BestTime");
+            findResult.Set(steamAPICall, OnLeaderboardFindResult);
+            string name = SteamFriends.GetPersonaName();
+            Debug.Log(name);
+        }
     }
 
-    public void AddCoins(int amount)
+    static private void OnLeaderboardFindResult(LeaderboardFindResult_t callback, bool failure)
+    {
+        UnityEngine.Debug.Log("STEAM LEADERBOARDS: Found - " + callback.m_bLeaderboardFound + " leaderboardID - " + callback.m_hSteamLeaderboard.m_SteamLeaderboard);
+        currentLeaderboard = callback.m_hSteamLeaderboard;
+    }
+
+    public void AddGems(int amount)
     {
         if (raceActive)
         {
-            gems += amount;
-            uiPlayerGemText.text = $"{gems}";
+            time -= amount * timePerGem;
+
+            if (lastTime <= 0)
+            {
+                lastTime = 0.001f;
+            }
+
+            uiPlayerTimeText.text = $"{time:#0.000}";
         }
     }
 }

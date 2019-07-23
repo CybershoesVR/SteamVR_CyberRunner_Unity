@@ -105,11 +105,11 @@ namespace Valve.VR
             }
         }
         
-        public virtual SteamVR_Action_Vector2 MoveRaw
+        public virtual SteamVR_Action_Vector2 MoveRawLeft
         {
             get
             {
-                return SteamVR_Actions.default_MoveRaw;
+                return SteamVR_Actions.default_MoveRawLeft;
             }
         }
         
@@ -118,6 +118,14 @@ namespace Valve.VR
             get
             {
                 return SteamVR_Actions.default_OpenMenu;
+            }
+        }
+        
+        public virtual SteamVR_Action_Vector2 MoveRawRight
+        {
+            get
+            {
+                return SteamVR_Actions.default_MoveRawRight;
             }
         }
         

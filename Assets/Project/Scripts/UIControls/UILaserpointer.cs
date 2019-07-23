@@ -68,8 +68,6 @@ public class UILaserpointer : MonoBehaviour
             laser.SetPosition(1, laserTarget);
 
 
-            Debug.Log(triggerPressed);
-
             if (ClickAction.GetState(pointerObject))
             {
                 if (!triggerPressed && selectedButton != null)

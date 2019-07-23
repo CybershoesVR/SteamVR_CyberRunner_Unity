@@ -14,13 +14,16 @@ public class PlayerMovement : MonoBehaviour
     public float minSpeed;
     public float maxSpeed;
     [SerializeField] float jumpForce; //Needs to be high (~500) depending on desired jump height.
+    [SerializeField] float jumpPush = 5;
+    [SerializeField] float pushDuration = 1;
     [SerializeField] bool flight = false;
     [Space]
     [SerializeField] CapsuleCollider playerCollider;
     [Space]
     [SerializeField] Transform hmdCamera; //Reference to the Headset Transform
     [SerializeField] SteamVR_Action_Vector2 moveAction;
-    [SerializeField] SteamVR_Action_Vector2 moveRawAction;
+    [SerializeField] SteamVR_Action_Vector2 moveRawLeftAction;
+    [SerializeField] SteamVR_Action_Vector2 moveRawRightAction;
     [SerializeField] SteamVR_Action_Boolean jumpAction;
     [SerializeField] SteamVR_Input_Sources treadmillSource = SteamVR_Input_Sources.Treadmill;
     [SerializeField] SteamVR_Input_Sources handSource = SteamVR_Input_Sources.LeftHand;
@@ -51,6 +54,13 @@ public class PlayerMovement : MonoBehaviour
     private bool isGrounded = false;
     private bool isJumping = false;
 
+    private bool stepLeft = false;
+    private bool stepRight = false;
+    private bool sprintLeft = false;
+    private bool sprintRight = false;
+    private bool leftFootPlayed = false;
+    private bool rightFootPlayed = false;
+
     #endregion
 
     void Start()
@@ -75,7 +85,8 @@ public class PlayerMovement : MonoBehaviour
         if (jumpAction.GetState(currentInputSource) && isGrounded && !isJumping)
         {
             isJumping = true;
-            rb.AddForce(Vector3.up * jumpForce);
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            SpeedBoost((hmdCamera.forward - new Vector3(0,hmdCamera.forward.y,0)) * jumpPush, pushDuration);
 
             if (rb.constraints == RigidbodyConstraints.FreezeRotation)
             {
@@ -95,20 +106,55 @@ public class PlayerMovement : MonoBehaviour
 
         //MOVEMENT
 
-        if (moveRawAction.axis.magnitude > 0.7f && isGrounded)
+        if (isGrounded)
         {
-            //Debug.Log(moveRawAction.axis.magnitude);
+            //IDEA FOR BETTER SOLUTION: Footstep sound switches tresholds depending on run speed
 
-            if (rightFoot && !rightFootAudioSource.isPlaying)
+            //float leftAxis = moveRawLeftAction.axis.magnitude;
+            //float rightAxis = moveRawRightAction.axis.magnitude;
+
+            //Debug.Log("Playing Left Foot: " + leftAxis);
+
+            //if (leftAxis > 0.5f && !leftFootAudioSource.isPlaying && !leftFootPlayed)
+            //{
+            //    stepLeft = true;
+            //    leftFootAudioSource.Play();
+            //    leftFootPlayed = true;
+            //}
+
+            //if (leftAxis > 0.7f)
+            //{
+            //    sprintLeft = true;
+            //}
+            //else if (leftAxis < 0.5f && sprintLeft)
+            //{
+            //    leftFootPlayed = false;
+            //}
+
+
+            if (moveRawLeftAction.axis.magnitude > 0.7f && !leftFootAudioSource.isPlaying && !leftFootPlayed)
             {
-                rightFootAudioSource.Play();
-            }
-            else if (!rightFoot && !leftFootAudioSource.isPlaying)
-            {
+                Debug.Log("Playing Left Foot: " + moveRawLeftAction.axis.magnitude);
+
                 leftFootAudioSource.Play();
+                leftFootPlayed = true;
+            }
+            else if (moveRawLeftAction.axis.magnitude < 0.3f)
+            {
+                leftFootPlayed = false;
             }
 
-            rightFoot = !rightFoot;
+            if (moveRawRightAction.axis.magnitude > 0.7f && !rightFootAudioSource.isPlaying && !rightFootPlayed)
+            {
+                Debug.Log("Right Raw: " + moveRawRightAction.axis.magnitude);
+
+                rightFootAudioSource.Play();
+                rightFootPlayed = true;
+            }
+            else if (moveRawRightAction.axis.magnitude < 0.3f)
+            {
+                rightFootPlayed = false;
+            }
         }
 
         float forward = moveAction.GetAxis(currentInputSource).y;

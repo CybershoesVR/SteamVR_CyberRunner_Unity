@@ -4,18 +4,23 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.IO;
+using Steamworks;
 
 public class RaceController : MonoBehaviour
 {
     //Variables
     #region
+    [SerializeField] string eventPlayerName;
+    [SerializeField] bool eventActive = false;
 
-    [SerializeField] TextMeshProUGUI uiPlayerTimeText;
+    [SerializeField] TextMeshProUGUI uiTimeText;
     [SerializeField] RectTransform scoreList;
     [SerializeField] GameObject scoreRowPrefab;
     [Space]
     [SerializeField] float timePerGem;
     [SerializeField] float finishTimeout = 1f;
+    [SerializeField] Color playerScoreHighlight;
+    [SerializeField] int leaderBoardEntryMax = 6;
 
     private FinishBoard finishBoard;
     private TextMeshProUGUI highscoreInfo;
@@ -26,32 +31,40 @@ public class RaceController : MonoBehaviour
     private float bestTime = 1000000; //Default Value set really high so a first best time can be achieved
     private float lastTime = 0;
 
+    private int currentRank = 9999;
+
+    private int playerCount = 1;
+
     private Gem[] gemObjects;
 
-    private string scoreListPath;
-    private FileStream stream;
+    //private string scoreListPath;
+    //private FileStream stream;
 
-    private LeaderboardManager leaderboardManager;
+    private SteamLeaderboardManager steamLeaderboard;
+    private EventLeaderboardManager eventLeaderboard;
 
     #endregion
 
-
     private void Start()
     {
-        leaderboardManager = FindObjectOfType<LeaderboardManager>();
-
-        leaderboardManager.FindLeaderboard("BestTime");
-
-        Invoke("LoadLeaderboardStats", 0.5f);
-        LoadStats();
-
-        //Only display if values are not default
-        //if (bestTime != 1000000)
-        //{
-        //    bestTimeText.text = $"{bestTime:#0.000} s";
-        //}
+        if (!eventActive)
+        {
+            steamLeaderboard = FindObjectOfType<SteamLeaderboardManager>();
+            steamLeaderboard.AssignEntryMax(leaderBoardEntryMax);
+            steamLeaderboard.FindLeaderboard("BestTime");
+            StartCoroutine(LoadSteamLeaderboardStats());
+        }
+        else
+        {
+            eventLeaderboard = FindObjectOfType<EventLeaderboardManager>();
+            eventLeaderboard.AssignEntryMax(leaderBoardEntryMax);
+            eventLeaderboard.LoadScoreList();
+            LoadNewPlayerStats();
+            //DisplayEventLeaderboardStats(eventLeaderboard.GetScoreRange(eventPlayerName));
+        }
 
         gemObjects = FindObjectsOfType<Gem>();
+        Debug.Log($"Number of Gems: {gemObjects.Length}");
 
         finishBoard = FindObjectOfType<FinishBoard>();
         highscoreInfo = finishBoard.GetComponentInChildren<TextMeshProUGUI>();
@@ -63,12 +76,21 @@ public class RaceController : MonoBehaviour
         if (raceActive)
         {
             time += Time.deltaTime;
-            uiPlayerTimeText.text = $"{time:#0.000}";
+            uiTimeText.text = $"{time:#0.000}";
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha2))
+        if (Input.GetKeyDown(KeyCode.F5))
         {
-            leaderboardManager.DownloadScores();
+            if (!eventActive)
+            {
+                steamLeaderboard.DownloadScores();
+            }
+            else
+            {
+                playerCount++;
+                eventPlayerName = $"Runner#{playerCount}";
+                LoadNewPlayerStats();
+            }
         }
     }
 
@@ -90,25 +112,34 @@ public class RaceController : MonoBehaviour
                 bestTime = lastTime;
 
                 highscoreInfo.text = "New Highscore!!!";
+
+                if (!eventActive)
+                {
+                    steamLeaderboard.UploadScore(bestTime);
+                }
+                else
+                {
+                    currentRank = eventLeaderboard.GetPlayerRank(bestTime);
+                    eventLeaderboard.SaveScore(new LocalScoreEntry(eventPlayerName, currentRank, bestTime));
+                }
             }
             else
             {
-                highscoreInfo.text = "Too slow!!!";
+                highscoreInfo.text = "You can be faster!!!";
             }
 
-            leaderboardManager.UploadScore(lastTime);
-            Invoke("LoadLeaderboardStats", 0.5f);
+            if (!eventActive)
+            {
+                StartCoroutine(LoadSteamLeaderboardStats());
+            }
+            else
+            {
+                DisplayEventLeaderboardStats(eventLeaderboard.GetScoreRange(eventPlayerName));
+            }
 
             finishBoard.Popup(finishTimeout);
 
-            //Save Stats
-            SaveStats();
-
-            //Display Stats
-            //bestTimeText.text = $"{bestTime:#0.000} s";
-
-            //lastTimeText.text = $"{lastTime:#0.000} s";
-            uiPlayerTimeText.text = $"{lastTime:#0.000}";
+            uiTimeText.text = $"{lastTime:#0.000}";
 
             foreach (Gem coin in gemObjects)
             {
@@ -124,11 +155,11 @@ public class RaceController : MonoBehaviour
 
         if (lastTime != 0)
         {
-            uiPlayerTimeText.text = $"{lastTime:#0.000}";
+            uiTimeText.text = $"{lastTime:#0.000}";
         }
         else
         {
-            uiPlayerTimeText.text = "0.000";
+            uiTimeText.text = "0.000";
         }
 
         foreach (Gem gem in gemObjects)
@@ -137,70 +168,60 @@ public class RaceController : MonoBehaviour
         }
     }
 
-    public void ResetStats()
+    IEnumerator LoadSteamLeaderboardStats()
     {
-        if (raceActive)
+        while (steamLeaderboard.downloadInProgress || steamLeaderboard.uploadInProgress)
         {
-            raceActive = false;
-            time = 0;
+            yield return new WaitForSeconds(0.25f);
         }
 
-        lastTime = 0;
+        steamLeaderboard.DownloadScores();
+
+        while (steamLeaderboard.downloadInProgress)
+        {
+            yield return new WaitForSeconds(0.25f);
+        }
+
+        ProcessSteamLeaderboardStats();
+        DisplaySteamLeaderboardStats();
+    }
+
+    void ProcessSteamLeaderboardStats()
+    {
+        for (int i = 0; i < steamLeaderboard.loadedScores.Length; i++)
+        {
+            if (steamLeaderboard.loadedScores[i].playerID == SteamUser.GetSteamID())
+            {
+                bestTime = steamLeaderboard.loadedScores[i].score;
+                currentRank = steamLeaderboard.loadedScores[i].rank;
+            }
+        }
+    }
+
+    void LoadNewPlayerStats()
+    {
+        Debug.Log("Stats Reloading...");
+
+        if (eventLeaderboard.loadedScores != null)
+        {
+            for (int i = 0; i < eventLeaderboard.loadedScores.Count; i++)
+            {
+                if (eventLeaderboard.loadedScores[i].playerName == eventPlayerName)
+                {
+                    bestTime = eventLeaderboard.loadedScores[i].score;
+                    currentRank = eventLeaderboard.loadedScores[i].rank;
+                    DisplayEventLeaderboardStats(eventLeaderboard.GetScoreRange(eventPlayerName));
+                    return;
+                }
+            }
+        }
+
         bestTime = 1000000;
-
-        //lastTimeText.text = "-";
-        uiPlayerTimeText.text = "0.000";
-        //bestTimeText.text = "-";
-
-        SaveStats();
+        currentRank = 9999;
+        DisplayEventLeaderboardStats(eventLeaderboard.GetScoreRange(eventPlayerName));
     }
 
-    void SaveStats()
-    {
-        stream = new FileStream(scoreListPath, FileMode.Create);
-
-        BinaryWriter writer = new BinaryWriter(stream);
-
-        writer.Write(bestTime);
-
-        stream.Flush();
-        writer.Close();
-    }
-
-    void LoadStats()
-    {
-        scoreListPath = Application.dataPath + "/Saves/";
-
-        if (!Directory.Exists(scoreListPath))
-        {
-            Directory.CreateDirectory(scoreListPath);
-        }
-
-        scoreListPath += "ScoreList.cr";
-
-        if (File.Exists(scoreListPath))
-        {
-            stream = new FileStream(scoreListPath, FileMode.Open);
-
-            BinaryReader reader = new BinaryReader(stream);
-
-            bestTime = reader.ReadSingle();
-
-            reader.Close();
-        }
-        else
-        {
-            SaveStats();
-        }
-    }
-
-    void LoadLeaderboardStats()
-    {
-        leaderboardManager.DownloadScores();
-        Invoke("DisplayLeaderboardStats", 1f);
-    }
-
-    void DisplayLeaderboardStats()
+    void DisplaySteamLeaderboardStats()
     {
         int childCount = scoreList.childCount;
 
@@ -209,19 +230,54 @@ public class RaceController : MonoBehaviour
             Destroy(scoreList.GetChild(i).gameObject);
         }
 
-        if (leaderboardManager.loadedScores == null)
+        if (steamLeaderboard.loadedScores == null)
         {
-            Debug.LogError("LoadedScores empty!");
+            Debug.LogError("Loaded Scores empty!");
             return;
         }
 
-        for (int i = 0; i < leaderboardManager.loadedScores.Length; i++)
+        for (int i = 0; i < steamLeaderboard.loadedScores.Length; i++)
         {
             GameObject newRow = Instantiate(scoreRowPrefab, scoreList);
 
-            newRow.transform.Find("RankText").GetComponent<TextMeshProUGUI>().text = leaderboardManager.loadedScores[i].rank.ToString();
-            newRow.transform.Find("NameText").GetComponent<TextMeshProUGUI>().text = leaderboardManager.loadedScores[i].playerName.ToString();
-            newRow.transform.Find("ScoreText").GetComponent<TextMeshProUGUI>().text = $"{leaderboardManager.loadedScores[i].score:#0.000}";
+            newRow.transform.Find("RankText").GetComponent<TextMeshProUGUI>().text = steamLeaderboard.loadedScores[i].rank.ToString();
+            newRow.transform.Find("NameText").GetComponent<TextMeshProUGUI>().text = SteamFriends.GetFriendPersonaName(steamLeaderboard.loadedScores[i].playerID);
+            newRow.transform.Find("ScoreText").GetComponent<TextMeshProUGUI>().text = $"{steamLeaderboard.loadedScores[i].score:#0.000}";
+
+            if (steamLeaderboard.loadedScores[i].playerID == SteamUser.GetSteamID())
+            {
+                newRow.GetComponent<Image>().color = playerScoreHighlight;
+            }
+        }
+    }
+
+    void DisplayEventLeaderboardStats(List<LocalScoreEntry> scoreRange)
+    {
+        int childCount = scoreList.childCount;
+
+        for (int i = 0; i < childCount; i++)
+        {
+            Destroy(scoreList.GetChild(i).gameObject);
+        }
+
+        if (scoreRange == null)
+        {
+            Debug.Log("Loaded Scores empty!");
+            return;
+        }
+
+        for (int i = 0; i < scoreRange.Count; i++)
+        {
+            GameObject newRow = Instantiate(scoreRowPrefab, scoreList);
+
+            newRow.transform.Find("RankText").GetComponent<TextMeshProUGUI>().text = scoreRange[i].rank.ToString();
+            newRow.transform.Find("NameText").GetComponent<TextMeshProUGUI>().text = scoreRange[i].playerName;
+            newRow.transform.Find("ScoreText").GetComponent<TextMeshProUGUI>().text = $"{scoreRange[i].score:#0.000}";
+
+            if (scoreRange[i].playerName == eventPlayerName)
+            {
+                newRow.GetComponent<Image>().color = playerScoreHighlight;
+            }
         }
     }
 
@@ -236,7 +292,7 @@ public class RaceController : MonoBehaviour
                 lastTime = 0.001f;
             }
 
-            uiPlayerTimeText.text = $"{time:#0.000}";
+            uiTimeText.text = $"{time:#0.000}";
         }
     }
 }

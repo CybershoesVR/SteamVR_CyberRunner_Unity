@@ -5,6 +5,7 @@ using System.IO;
 
 public class EventLeaderboardManager : MonoBehaviour
 {
+    public int scoreMultiplier = 1000000000;
     public string EventName = "Gamescom2019";
 
     [HideInInspector]
@@ -25,16 +26,16 @@ public class EventLeaderboardManager : MonoBehaviour
     {
         if (loadedScores != null)
         {
-            for (int i = 0; i < loadedScores.Count; i++)
-            {
-                if (loadedScores[i].playerName == newScore.playerName)
-                {
-                    Debug.Log($"Removing {loadedScores[i].playerName}...");
-                    loadedScores.RemoveAt(i);
-                }
-            }
+            int index = loadedScores.FindIndex(0, x => x.playerName == newScore.playerName);
 
-            loadedScores.Insert(newScore.rank - 1, newScore);
+            if (index == -1)
+            {
+                loadedScores.Add(newScore);
+            }
+            else
+            {
+                loadedScores[index] = newScore;
+            }
         }
         else
         {
@@ -42,21 +43,28 @@ public class EventLeaderboardManager : MonoBehaviour
             loadedScores.Add(newScore);
         }
 
-        stream = new FileStream(scoreListPath, FileMode.Create);
+        UpdateScores();
 
-        BinaryWriter writer = new BinaryWriter(stream);
+        //stream = new FileStream(scoreListPath, FileMode.Create);
 
-        writer.Write(loadedScores.Count); //COUNT
+        //BinaryWriter writer = new BinaryWriter(stream);
+
+        //writer.Write(loadedScores.Count); //COUNT
+
+        string fileText = EventName + "\n";
 
         for (int i = 0; i < loadedScores.Count; i++)
         {
-            writer.Write(loadedScores[i].playerName);
-            writer.Write(i+1);
-            writer.Write(loadedScores[i].score);
+            //writer.Write(loadedScores[i].playerName);
+            //writer.Write(i+1);
+            //writer.Write(loadedScores[i].score);
+            fileText += $"{loadedScores[i].rank}\t{loadedScores[i].playerName}\t{loadedScores[i].score}\t{loadedScores[i].email}\n";
         }
 
-        stream.Flush();
-        writer.Close();
+        File.WriteAllText(scoreListPath, fileText);
+
+        //stream.Flush();
+        //writer.Close();
     }
 
     public void LoadScoreList()
@@ -68,52 +76,48 @@ public class EventLeaderboardManager : MonoBehaviour
             Directory.CreateDirectory(scoreListPath);
         }
 
-        scoreListPath += $"{EventName}_ScoreList.cr";
+        scoreListPath += $"{EventName}_ScoreList.txt";
 
         if (File.Exists(scoreListPath))
         {
-            stream = new FileStream(scoreListPath, FileMode.Open);
-
-            BinaryReader reader = new BinaryReader(stream);
+            //stream = new FileStream(scoreListPath, FileMode.Open);
+            //BinaryReader reader = new BinaryReader(stream);
 
             loadedScores = new List<LocalScoreEntry>();
 
-            int count = reader.ReadInt32();
-            Debug.Log("COUNT: " + count);
+            //int count = reader.ReadInt32();
+            //Debug.Log("COUNT: " + count);
 
-            for (int i = 0; i < count; i++)
+            //for (int i = 0; i < count; i++)
+            //{
+            //    string name = reader.ReadString();
+            //    int rank = reader.ReadInt32();
+            //    float time = reader.ReadSingle();
+
+            //    loadedScores.Add(new LocalScoreEntry(name, rank, time));
+            //}
+
+            //reader.Close();
+
+            string[] fileLines = File.ReadAllLines(scoreListPath);
+
+            for (int i = 1; i < fileLines.Length; i++)
             {
-                string name = reader.ReadString();
-                int rank = reader.ReadInt32();
-                float time = reader.ReadSingle();
+                string[] lineChunks = fileLines[i].Split('\t');
 
-                loadedScores.Add(new LocalScoreEntry(name, rank, time));
+                //Rank is update right after, so there is no need to read it out
+                loadedScores.Add(new LocalScoreEntry(lineChunks[1], 0, float.Parse(lineChunks[2]), lineChunks[3]));
             }
 
-            reader.Close();
+            if (loadedScores.Count > 1)
+            {
+                UpdateScores();
+            }
         }
         else
         {
             loadedScores = null;
         }
-    }
-
-    public int GetPlayerRank(float score)
-    {
-        if (loadedScores == null)
-        {
-            return 1;
-        }
-
-        for (int i = loadedScores.Count-1; i >= 0 ; i--)
-        {
-            if (score < loadedScores[i].score)
-            {
-                return i+1;
-            }
-        }
-
-        return loadedScores.Count;
     }
 
     public List<LocalScoreEntry> GetScoreRange(string playerName)
@@ -162,5 +166,18 @@ public class EventLeaderboardManager : MonoBehaviour
         }
 
         return scoreRange;
+    }
+
+    void UpdateScores()
+    {
+        loadedScores.Sort(delegate (LocalScoreEntry x, LocalScoreEntry y)
+        {
+            return x.score.CompareTo(y.score);
+        });
+
+        for (int i = 0; i < loadedScores.Count; i++)
+        {
+            loadedScores[i] = new LocalScoreEntry(loadedScores[i].playerName, i + 1, loadedScores[i].score);
+        }
     }
 }

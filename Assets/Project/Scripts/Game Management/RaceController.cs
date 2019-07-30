@@ -16,6 +16,8 @@ public class RaceController : MonoBehaviour
     [SerializeField] TextMeshProUGUI uiTimeText;
     [SerializeField] RectTransform scoreList;
     [SerializeField] GameObject scoreRowPrefab;
+    [SerializeField] TextMeshProUGUI leaderboardTitle;
+    [SerializeField] TextMeshProUGUI playerNameText;
     [Space]
     [SerializeField] float timePerGem;
     [SerializeField] float finishTimeout = 1f;
@@ -33,7 +35,8 @@ public class RaceController : MonoBehaviour
 
     private int currentRank = 9999;
 
-    private int playerCount = 1;
+    private int gems;
+    private int maxGems;
 
     private Gem[] gemObjects;
 
@@ -53,18 +56,21 @@ public class RaceController : MonoBehaviour
             steamLeaderboard.AssignEntryMax(leaderBoardEntryMax);
             steamLeaderboard.FindLeaderboard("BestTime");
             StartCoroutine(LoadSteamLeaderboardStats());
+            leaderboardTitle.text = "Global Leaderboard";
         }
         else
         {
             eventLeaderboard = FindObjectOfType<EventLeaderboardManager>();
             eventLeaderboard.AssignEntryMax(leaderBoardEntryMax);
             eventLeaderboard.LoadScoreList();
+            eventPlayerName = NameGenerator.GenerateName();
             LoadNewPlayerStats();
-            //DisplayEventLeaderboardStats(eventLeaderboard.GetScoreRange(eventPlayerName));
+            leaderboardTitle.text = eventLeaderboard.EventName;
         }
 
         gemObjects = FindObjectsOfType<Gem>();
-        Debug.Log($"Number of Gems: {gemObjects.Length}");
+        maxGems = gemObjects.Length;
+        Debug.Log($"Number of Gems: {maxGems}");
 
         finishBoard = FindObjectOfType<FinishBoard>();
         highscoreInfo = finishBoard.GetComponentInChildren<TextMeshProUGUI>();
@@ -87,8 +93,7 @@ public class RaceController : MonoBehaviour
             }
             else
             {
-                playerCount++;
-                eventPlayerName = $"Runner#{playerCount}";
+                eventPlayerName = NameGenerator.GenerateName();
                 LoadNewPlayerStats();
             }
         }
@@ -97,6 +102,7 @@ public class RaceController : MonoBehaviour
     public void StartRace()
     {
         time = 0;
+        gems = 0;
         raceActive = true;
     }
 
@@ -106,6 +112,11 @@ public class RaceController : MonoBehaviour
         {
             raceActive = false;
             lastTime = Mathf.Floor(time * 1000) / 1000;
+
+            if (lastTime <= 7)
+            {
+                AchievementManager.SetAchievement("achievement_03");
+            }
 
             if (lastTime < bestTime)
             {
@@ -119,7 +130,6 @@ public class RaceController : MonoBehaviour
                 }
                 else
                 {
-                    currentRank = eventLeaderboard.GetPlayerRank(bestTime);
                     eventLeaderboard.SaveScore(new LocalScoreEntry(eventPlayerName, currentRank, bestTime));
                 }
             }
@@ -141,6 +151,11 @@ public class RaceController : MonoBehaviour
 
             uiTimeText.text = $"{lastTime:#0.000}";
 
+            if (gems <= 0)
+            {
+                AchievementManager.SetAchievement("achievement_02");
+            }
+
             foreach (Gem coin in gemObjects)
             {
                 coin.Respawn();
@@ -151,6 +166,7 @@ public class RaceController : MonoBehaviour
     public void ResetRace()
     {
         time = 0;
+        gems = 0;
         raceActive = false;
 
         if (lastTime != 0)
@@ -201,6 +217,8 @@ public class RaceController : MonoBehaviour
     void LoadNewPlayerStats()
     {
         Debug.Log("Stats Reloading...");
+
+        playerNameText.text = eventPlayerName;
 
         if (eventLeaderboard.loadedScores != null)
         {
@@ -285,6 +303,19 @@ public class RaceController : MonoBehaviour
     {
         if (raceActive)
         {
+            gems++;
+
+            if (gems >= 50)
+            {
+                AchievementManager.SetAchievement("achievement_00");
+
+                if (gems >= maxGems)
+                {
+                    AchievementManager.SetAchievement("achievement_01");
+                }
+            }
+
+
             time -= amount * timePerGem;
 
             if (lastTime <= 0)

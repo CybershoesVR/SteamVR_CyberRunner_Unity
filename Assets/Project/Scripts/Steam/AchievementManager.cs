@@ -3,25 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using Steamworks;
 
-public class AchievementManager : MonoBehaviour
+public static class AchievementManager
 {
-    private bool unlocked = false;
+    private static bool unlocked = false;
 
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            SetAchievement("achievement_00");
-        }
-
-        if (Input.GetKeyDown(KeyCode.B))
-        {
-            DEBUG_ClearAchievement("achievement_00");
-        }
-    }
-
-    public void SetAchievement(string id)
+    public static void SetAchievement(string id)
     {
         if (SteamManager.Initialized)
         {
@@ -36,7 +22,7 @@ public class AchievementManager : MonoBehaviour
         }
     }
 
-    public void DEBUG_ClearAchievement(string id)
+    public static void DEBUG_ClearAchievement(string id)
     {
         if (SteamManager.Initialized)
         {
@@ -49,7 +35,7 @@ public class AchievementManager : MonoBehaviour
         }
     }
 
-    void CheckAchievement(string id)
+    static void CheckAchievement(string id)
     {
         SteamUserStats.GetAchievement(id, out unlocked);
     }

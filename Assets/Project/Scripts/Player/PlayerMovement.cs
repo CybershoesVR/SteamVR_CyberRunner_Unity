@@ -57,6 +57,9 @@ public class PlayerMovement : MonoBehaviour
     private bool leftFootPlayed = false;
     private bool rightFootPlayed = false;
 
+    private float rawActionTimer = 11;
+    private bool rawActionsEnabled = false;
+
     #endregion
 
     void Start()
@@ -103,7 +106,7 @@ public class PlayerMovement : MonoBehaviour
         //MOVEMENT
 
         //Step Sounds
-        if (isGrounded)
+        if (isGrounded && rawActionsEnabled)
         {
             if (moveRawLeftAction.axis.magnitude > 0.7f && !leftFootAudioSource.isPlaying && !leftFootPlayed)
             {
@@ -227,6 +230,11 @@ public class PlayerMovement : MonoBehaviour
         return moveSpeed;
     }
 
+    public float GetSpeed()
+    {
+        return moveSpeed;
+    }
+
     public float AddSpeed(float amount)
     {
         float newSpeed = moveSpeed + amount;
@@ -255,6 +263,12 @@ public class PlayerMovement : MonoBehaviour
         {
             currentInputSource = handSource;
         }
+    }
+
+    IEnumerator WaitForRawActions()
+    {
+        yield return new WaitForSeconds(rawActionTimer);
+        rawActionsEnabled = true;
     }
 
     private void OnDrawGizmosSelected()

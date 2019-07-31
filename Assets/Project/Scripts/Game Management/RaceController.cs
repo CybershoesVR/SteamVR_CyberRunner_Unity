@@ -11,6 +11,7 @@ public class RaceController : MonoBehaviour
     //Variables
     #region
     [SerializeField] string eventPlayerName;
+    [SerializeField] string cachedEmail = "[No Email]";
     [SerializeField] bool eventActive = false;
 
     [SerializeField] TextMeshProUGUI uiTimeText;
@@ -63,7 +64,8 @@ public class RaceController : MonoBehaviour
             eventLeaderboard = FindObjectOfType<EventLeaderboardManager>();
             eventLeaderboard.AssignEntryMax(leaderBoardEntryMax);
             eventLeaderboard.LoadScoreList();
-            eventPlayerName = NameGenerator.GenerateName();
+            eventLeaderboard.ClearEmptyPlayers();
+            eventPlayerName = "Runner#1";
             LoadNewPlayerStats();
             leaderboardTitle.text = eventLeaderboard.EventName;
         }
@@ -85,15 +87,26 @@ public class RaceController : MonoBehaviour
             uiTimeText.text = $"{time:#0.000}";
         }
 
-        if (Input.GetKeyDown(KeyCode.F5))
+        if (Input.GetKeyDown(KeyCode.F5) && !eventActive)
         {
-            if (!eventActive)
+            steamLeaderboard.DownloadScores();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            eventLeaderboard.ClearEmptyPlayers();
+
+            int exitCode = PlayerForm.AddPlayer(eventLeaderboard.scoreListPath);
+
+            if (exitCode > 0)
             {
-                steamLeaderboard.DownloadScores();
-            }
-            else
-            {
-                eventPlayerName = NameGenerator.GenerateName();
+                eventLeaderboard.LoadScoreList();
+
+                LocalScoreEntry newPlayer = eventLeaderboard.InitPlayer();
+
+                eventPlayerName = newPlayer.playerName;
+                cachedEmail = newPlayer.email;
+
                 LoadNewPlayerStats();
             }
         }
@@ -130,7 +143,7 @@ public class RaceController : MonoBehaviour
                 }
                 else
                 {
-                    eventLeaderboard.SaveScore(new LocalScoreEntry(eventPlayerName, currentRank, bestTime));
+                    eventLeaderboard.SaveScore(new LocalScoreEntry(eventPlayerName, currentRank, bestTime, cachedEmail));
                 }
             }
             else

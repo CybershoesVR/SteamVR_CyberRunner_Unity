@@ -11,11 +11,17 @@ public class EventLeaderboardManager : MonoBehaviour
     [HideInInspector]
     public List<LocalScoreEntry> loadedScores;
 
-    private string scoreListPath;
+    [HideInInspector]
+    public string scoreListPath { get; private set; }
     private FileStream stream;
 
     private int leaderboardEntryMax;
 
+
+    private void OnDisable()
+    {
+        ClearEmptyPlayers();
+    }
 
     public void AssignEntryMax(int entryMax)
     {
@@ -45,26 +51,14 @@ public class EventLeaderboardManager : MonoBehaviour
 
         UpdateScores();
 
-        //stream = new FileStream(scoreListPath, FileMode.Create);
-
-        //BinaryWriter writer = new BinaryWriter(stream);
-
-        //writer.Write(loadedScores.Count); //COUNT
-
         string fileText = EventName + "\n";
 
         for (int i = 0; i < loadedScores.Count; i++)
         {
-            //writer.Write(loadedScores[i].playerName);
-            //writer.Write(i+1);
-            //writer.Write(loadedScores[i].score);
             fileText += $"{loadedScores[i].rank}\t{loadedScores[i].playerName}\t{loadedScores[i].score}\t{loadedScores[i].email}\n";
         }
 
         File.WriteAllText(scoreListPath, fileText);
-
-        //stream.Flush();
-        //writer.Close();
     }
 
     public void LoadScoreList()
@@ -116,6 +110,7 @@ public class EventLeaderboardManager : MonoBehaviour
         }
         else
         {
+            File.Create(scoreListPath);
             loadedScores = null;
         }
     }
@@ -140,13 +135,13 @@ public class EventLeaderboardManager : MonoBehaviour
         {
             if (loadedScores[i].playerName == playerName)
             {
-                Debug.Log("FOUND PLAYER");
+                UnityEngine.Debug.Log("FOUND PLAYER");
 
                 for (int j = (i - rangeStart); j <= (i + rangeEnd); j++)
                 {
                     if (j < loadedScores.Count && j >= 0)
                     {
-                        Debug.Log("SCORE APPROPRIATE");
+                        UnityEngine.Debug.Log("SCORE APPROPRIATE");
                         scoreRange.Add(loadedScores[j]);
                     }
                 }
@@ -157,7 +152,7 @@ public class EventLeaderboardManager : MonoBehaviour
 
         if (!nameFound)
         {
-            Debug.Log("NO PLAYER STATS FOUND");
+            UnityEngine.Debug.Log("NO PLAYER STATS FOUND");
 
             for (int i = 0; i < leaderboardEntryAmount; i++)
             {
@@ -166,6 +161,67 @@ public class EventLeaderboardManager : MonoBehaviour
         }
 
         return scoreRange;
+    }
+
+    public void ClearEmptyPlayers()
+    {
+        if (loadedScores != null && loadedScores.Count > 0)
+        {
+            for (int i = loadedScores.Count-1; i >= 0; i--)
+            {
+                if (loadedScores[i].score > 100000)
+                {
+                    loadedScores.RemoveAt(loadedScores.Count - 1);
+                }
+            }
+
+            string fileText = EventName + "\n";
+
+            for (int i = 0; i < loadedScores.Count; i++)
+            {
+                fileText += $"{loadedScores[i].rank}\t{loadedScores[i].playerName}\t{loadedScores[i].score}\t{loadedScores[i].email}\n";
+            }
+
+            File.WriteAllText(scoreListPath, fileText);
+        }
+    }
+
+    public LocalScoreEntry InitPlayer()
+    {
+        LocalScoreEntry addedPlayerScore = loadedScores[loadedScores.Count - 1];
+
+        loadedScores.RemoveAt(loadedScores.Count - 1);
+
+        if (loadedScores.Count > 0)
+        {
+            int index = loadedScores.FindIndex(0, x => x.playerName == addedPlayerScore.playerName);
+
+            if (index == -1)
+            {
+                loadedScores.Add(addedPlayerScore);
+            }
+            else
+            {
+                loadedScores[index] = new LocalScoreEntry(loadedScores[index].playerName, loadedScores[index].rank, loadedScores[index].score, addedPlayerScore.email);
+
+                string fileText = EventName + "\n";
+
+                for (int i = 0; i < loadedScores.Count; i++)
+                {
+                    fileText += $"{loadedScores[i].rank}\t{loadedScores[i].playerName}\t{loadedScores[i].score}\t{loadedScores[i].email}\n";
+                }
+
+                File.WriteAllText(scoreListPath, fileText);
+
+                return loadedScores[index];
+            }
+        }
+        else
+        {
+            loadedScores.Add(addedPlayerScore);
+        }
+
+        return addedPlayerScore;
     }
 
     void UpdateScores()
@@ -177,7 +233,7 @@ public class EventLeaderboardManager : MonoBehaviour
 
         for (int i = 0; i < loadedScores.Count; i++)
         {
-            loadedScores[i] = new LocalScoreEntry(loadedScores[i].playerName, i + 1, loadedScores[i].score);
+            loadedScores[i] = new LocalScoreEntry(loadedScores[i].playerName, i + 1, loadedScores[i].score, loadedScores[i].email);
         }
     }
 }

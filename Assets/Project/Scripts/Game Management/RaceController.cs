@@ -135,7 +135,17 @@ public class RaceController : MonoBehaviour
             {
                 bestTime = lastTime;
 
-                highscoreInfo.text = "New Highscore!!!";
+                //if (eventLeaderboard.RankUpgrade(currentRank))
+                //{
+                //    highscoreInfo.text = "New Rank!!!";
+                //}
+                //else
+                //{
+                //    highscoreInfo.text = "Personal Best!!!";
+                //}
+
+                highscoreInfo.text = "Personal Best!!!";
+
 
                 if (!eventActive)
                 {

@@ -126,7 +126,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speedMultiplier: 25
-  fadeTime: 25
+  fadeTime: 2
 --- !u!135 &7178417469006617545
 SphereCollider:
   m_ObjectHideFlags: 0

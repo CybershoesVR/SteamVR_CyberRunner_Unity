@@ -24,13 +24,8 @@ public class SteamManager : MonoBehaviour {
 	private static SteamManager s_instance;
 	private static SteamManager Instance {
 		get {
-			if (s_instance == null) {
-				return new GameObject("SteamManager").AddComponent<SteamManager>();
-			}
-			else {
-				return s_instance;
-			}
-		}
+            return s_instance;
+        }
 	}
 
 	private static bool s_EverInitialized;

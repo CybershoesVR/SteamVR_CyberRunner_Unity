@@ -687,7 +687,7 @@ AudioSource:
   m_audioClip: {fileID: 8300000, guid: 0e09f0ea513c37d47a19efbf39087ac1, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 0.1
-  m_Pitch: 2
+  m_Pitch: 1
   Loop: 0
   Mute: 0
   Spatialize: 0
@@ -730,7 +730,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.5
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1299,7 +1299,7 @@ AudioSource:
   m_audioClip: {fileID: 8300000, guid: 0e09f0ea513c37d47a19efbf39087ac1, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 0.1
-  m_Pitch: 2
+  m_Pitch: 1
   Loop: 0
   Mute: 0
   Spatialize: 0
@@ -1342,7 +1342,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.5
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1763,7 +1763,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_text: New Highscore!
+  m_text: New Highscore!!!
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 03d1a01075927ae45848668c91a3c265, type: 2}
   m_sharedMaterial: {fileID: 8615842790145068126, guid: 03d1a01075927ae45848668c91a3c265,
@@ -1806,7 +1806,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 0
+  m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_firstOverflowCharacterIndex: 0
@@ -2322,7 +2322,7 @@ MonoBehaviour:
   slopeRayHeight: 0
   maxSlopeSteepness: 40
   slopeThreshold: 0.01
-  currentInputSource: 1
+  currentInputSource: 13
   leftFootAudioSource: {fileID: 1426083713}
   rightFootAudioSource: {fileID: 1073502142}
 --- !u!114 &2645471334258206897

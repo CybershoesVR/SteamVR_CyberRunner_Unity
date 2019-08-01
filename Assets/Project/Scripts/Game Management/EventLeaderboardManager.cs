@@ -236,4 +236,23 @@ public class EventLeaderboardManager : MonoBehaviour
             loadedScores[i] = new LocalScoreEntry(loadedScores[i].playerName, i + 1, loadedScores[i].score, loadedScores[i].email);
         }
     }
+
+    public bool RankUpgrade(int currentRank)
+    {
+        if (loadedScores != null && loadedScores.Count >= currentRank-1)
+        {
+            if (currentRank > 1 && loadedScores[currentRank-1].score < loadedScores[currentRank - 2].score)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return true;
+        }
+    }
 }

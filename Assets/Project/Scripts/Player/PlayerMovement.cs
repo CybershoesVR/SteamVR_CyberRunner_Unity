@@ -73,6 +73,8 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         jumpAudioSource = GetComponent<AudioSource>();
         colliderTransform = playerCollider.transform;
+
+        StartCoroutine(WaitForRawActions());
     }
 
     private void Update()
@@ -147,21 +149,29 @@ public class PlayerMovement : MonoBehaviour
 
 
         //Y is cancelled out here because we don't want any height values.
-        //Vector3 hmdDirectionForward = hmdCamera.forward - new Vector3(0, hmdCamera.forward.y, 0);
-        //Vector3 hmdDirectionRight = hmdCamera.right - new Vector3(0, hmdCamera.right.y, 0);
+        Vector3 hmdDirectionForward = hmdCamera.forward - new Vector3(0, hmdCamera.forward.y, 0);
+        Vector3 hmdDirectionRight = hmdCamera.right - new Vector3(0, hmdCamera.right.y, 0);
 
         //Sets the velocity relative to the Headset
         //Y velocity is assigned to itself to not cancel out gravitation.
 
-        Vector3 newVelocity = hmdCamera.forward * forwardInput + hmdCamera.right * sidewaysInput;// * (moveSpeed * sprintMultiplier)) + externalImpulse;
-        newVelocity = Vector3.ProjectOnPlane(newVelocity, groundContactNormal).normalized;
-        //newVelocity.y = rb.velocity.y + externalImpulse.y;
-        newVelocity *= (moveSpeed * sprintMultiplier);
+        Vector3 newVelocity = hmdDirectionForward * forwardInput + hmdDirectionRight * sidewaysInput;// * (moveSpeed * sprintMultiplier)) + externalImpulse;
 
-        if (rb.velocity.magnitude < currentTargetSpeed)
-        {
-            rb.AddForce(newVelocity * SlopeMultiplier(), ForceMode.Impulse);
-        }
+        //newVelocity = Vector3.ProjectOnPlane(newVelocity, groundContactNormal).normalized;
+
+        //newVelocity.y = rb.velocity.y + externalImpulse.y;
+        newVelocity *= (moveSpeed * sprintMultiplier) * SlopeMultiplier();
+
+        newVelocity.y = rb.velocity.y;
+
+        //Debug.Log(newVelocity);
+
+        rb.velocity = newVelocity;
+
+        //if (rb.velocity.magnitude < currentTargetSpeed)
+        //{
+        //    rb.AddForce(newVelocity, ForceMode.VelocityChange);
+        //}
 
         if (isGrounded)
         {
@@ -169,22 +179,17 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            rb.drag = 2;
+            rb.drag = 0;
 
-            if (!isJumping && wasGrounded)
+            if (wasGrounded && !isJumping)
             {
                 StickToGroundHelper();
             }
         }
 
-        //if (SlopesFlat(groundCheckStart.position, new Vector3(newVelocity.x, 0, newVelocity.z), 10f)) // filter the y out, so it only checks forward... could get messy with the cosine otherwise.
-        //{
-        //    rb.velocity = newVelocity;
-        //}
-
         if (externalImpulse.magnitude > float.Epsilon)
         {
-            rb.AddForce(externalImpulse, ForceMode.Impulse);
+            rb.velocity += externalImpulse;
             impulseTimer += Time.fixedDeltaTime / impulseDuration;
             externalImpulse = Vector3.Lerp(externalImpulse, Vector3.zero, impulseTimer);
         }

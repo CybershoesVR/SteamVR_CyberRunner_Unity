@@ -207,15 +207,6 @@
             {
                "inputs" : {
                   "position" : {
-                     "output" : "/actions/default/in/move"
-                  }
-               },
-               "mode" : "trackpad",
-               "path" : "/user/treadmill/input/trackpad_default"
-            },
-            {
-               "inputs" : {
-                  "position" : {
                      "output" : "/actions/default/in/moverawleft"
                   }
                },
@@ -230,6 +221,15 @@
                },
                "mode" : "trackpad",
                "path" : "/user/treadmill/input/trackpad_raw_right"
+            },
+            {
+               "inputs" : {
+                  "position" : {
+                     "output" : "/actions/default/in/move"
+                  }
+               },
+               "mode" : "trackpad",
+               "path" : "/user/treadmill/input/trackpad_default"
             }
          ]
       },
@@ -281,7 +281,7 @@
    "category" : "steamvr_input",
    "controller_type" : "cybershoes",
    "description" : "",
-   "name" : "Meine Cybershoes_DeveloperPlayground [Testing] Konfiguration für Cybershoes Controller",
+   "name" : "My Cybershoes_DeveloperPlayground [Testing] configuration for Cybershoes Controller",
    "options" : {},
    "simulated_actions" : []
 }

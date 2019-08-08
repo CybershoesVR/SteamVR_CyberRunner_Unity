@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class Gem : MonoBehaviour
 {
-    [SerializeField]
-    int value = 1;
+    [SerializeField] int value = 1;
 
     private MeshRenderer meshRenderer;
     private SphereCollider coinCollider;
@@ -27,10 +26,11 @@ public class Gem : MonoBehaviour
 
         if (player)
         {
-            player.AddCoins(value);
+            float pitchOffset = player.AddGems(value);
             coinCollider.enabled = false;
             meshRenderer.enabled = false;
             collectParticles.Play();
+            source.pitch = 1 + (pitchOffset * 0.05f);
             source.Play();
         }
     }

@@ -6,8 +6,12 @@ using Valve.VR;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] AudioSource colliderSource;
+    [SerializeField] int gemMaxPitch = 10;
+    [SerializeField] float recentGemTime = 1;
 
     private RaceController raceController;
+
+    private int recentGems = 0;
 
 
     void Start()
@@ -35,8 +39,27 @@ public class PlayerController : MonoBehaviour
     //    }
     //}
 
-    public void AddCoins(int amount)
+    public int AddGems(int amount)
     {
         raceController.AddGems(amount);
+
+        if (recentGems > gemMaxPitch)
+        {
+            recentGems = 0;
+            CancelInvoke("ResetRecentGems");
+        }
+        else
+        {
+            recentGems++;
+            CancelInvoke("ResetRecentGems");
+            Invoke("ResetRecentGems", recentGemTime);
+        }
+
+        return recentGems;
+    }
+
+    void ResetRecentGems()
+    {
+        recentGems = 0;
     }
 }

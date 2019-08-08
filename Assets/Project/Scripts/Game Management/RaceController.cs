@@ -24,6 +24,9 @@ public class RaceController : MonoBehaviour
     [SerializeField] float finishTimeout = 1f;
     [SerializeField] Color playerScoreHighlight;
     [SerializeField] int leaderBoardEntryMax = 6;
+    [Space]
+    [SerializeField] float speedDecreaseBonus;
+    [SerializeField] float speedIncreaseMalus;
 
     private FinishBoard finishBoard;
     private TextMeshProUGUI highscoreInfo;
@@ -35,6 +38,9 @@ public class RaceController : MonoBehaviour
     private float lastTime = 0;
 
     private int currentRank = 9999;
+
+    private float defaultSpeed;
+    private PlayerMovement player;
 
     private int gems;
     private int maxGems;
@@ -58,6 +64,7 @@ public class RaceController : MonoBehaviour
             steamLeaderboard.FindLeaderboard("BestTime");
             StartCoroutine(LoadSteamLeaderboardStats());
             leaderboardTitle.text = "Global Leaderboard";
+            playerNameText.text = SteamFriends.GetPersonaName();
         }
         else
         {
@@ -69,6 +76,9 @@ public class RaceController : MonoBehaviour
             LoadNewPlayerStats();
             leaderboardTitle.text = eventLeaderboard.EventName;
         }
+
+        player = FindObjectOfType<PlayerMovement>();
+        defaultSpeed = player.GetSpeed();
 
         gemObjects = FindObjectsOfType<Gem>();
         maxGems = gemObjects.Length;
@@ -114,7 +124,21 @@ public class RaceController : MonoBehaviour
 
     public void StartRace()
     {
-        time = 0;
+        float currentSpeed = player.GetSpeed();
+
+        if (currentSpeed < defaultSpeed)
+        {
+            time = -speedDecreaseBonus;
+        }
+        else if (currentSpeed > defaultSpeed)
+        {
+            time = speedIncreaseMalus;
+        }
+        else
+        {
+            time = 0;
+        }
+        
         gems = 0;
         raceActive = true;
     }
@@ -340,11 +364,6 @@ public class RaceController : MonoBehaviour
 
 
             time -= amount * timePerGem;
-
-            if (lastTime <= 0)
-            {
-                lastTime = 0.001f;
-            }
 
             uiTimeText.text = $"{time:#0.000}";
         }

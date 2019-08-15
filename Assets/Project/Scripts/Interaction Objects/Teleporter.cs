@@ -9,7 +9,7 @@ public class Teleporter : MonoBehaviour
     [SerializeField] Transform spawnPoint;
     //[SerializeField]
     //Animator effectCanvas;
-    [SerializeField] float fadeDuration = 2;
+    public float fadeDuration = 2;
 
     private Transform player;
 

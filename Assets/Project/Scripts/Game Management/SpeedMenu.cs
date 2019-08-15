@@ -9,6 +9,17 @@ public class SpeedMenu : MonoBehaviour
     //[SerializeField] TextMeshProUGUI speedDisplayText;
     //[SerializeField] Button[] addButtons;
     //[SerializeField] Button[] subButtons;
+    //[SerializeField] Animator normalAnim;
+    //[SerializeField] Animator slowAnim;
+    //[SerializeField] Animator fastAnim;
+
+    [SerializeField] ParticleSystem normalSelection;
+    [SerializeField] ParticleSystem slowSelection;
+    [SerializeField] ParticleSystem fastSelection;
+
+    private AudioSource normalSource;
+    private AudioSource slowSource;
+    private AudioSource fastSource;
 
     private PlayerMovement player;
 
@@ -16,6 +27,10 @@ public class SpeedMenu : MonoBehaviour
     void Start()
     {
         player = FindObjectOfType<PlayerMovement>();
+
+        normalSource = normalSelection.GetComponentInParent<AudioSource>();
+        slowSource = slowSelection.GetComponentInParent<AudioSource>();
+        fastSource = fastSelection.GetComponentInParent<AudioSource>();
     }
 
     public void AddSpeed(float amount)
@@ -24,58 +39,59 @@ public class SpeedMenu : MonoBehaviour
 
         //speedDisplayText.text = newSpeed.ToString();
 
-        //if (newSpeed == player.minSpeed)
-        //{
-        //    foreach (Button button in addButtons)
-        //    {
-        //        button.interactable = true;
-        //    }
+        if (newSpeed == player.minSpeed)
+        {
+            normalSelection.Stop();
+            fastSelection.Stop();
 
-        //    foreach (Button button in subButtons)
-        //    {
-        //        button.interactable = false;
-        //    }
-        //}
-        //else if (newSpeed == player.maxSpeed)
-        //{
-        //    foreach (Button button in addButtons)
-        //    {
-        //        button.interactable = false;
-        //    }
+            slowSelection.Play();
+            slowSource.Play();
+        }
+        else if (newSpeed == player.maxSpeed)
+        {
+            normalSelection.Stop();
+            slowSelection.Stop();
 
-        //    foreach (Button button in subButtons)
-        //    {
-        //        button.interactable = true;
-        //    }
-        //}
-        //else
-        //{
-        //    foreach (Button button in addButtons)
-        //    {
-        //        button.interactable = true;
-        //    }
+            fastSelection.Play();
+            fastSource.Play();
+        }
+        else
+        {
+            fastSelection.Stop();
+            slowSelection.Stop();
 
-        //    foreach (Button button in subButtons)
-        //    {
-        //        button.interactable = true;
-        //    }
-        //}
+            normalSelection.Play();
+            normalSource.Play();
+        }
     }
 
     public void SetSpeed(float newSpeed)
     {
         player.SetSpeed(newSpeed);
 
-        //speedDisplayText.text = player.SetSpeed(newSpeed).ToString();
+        if (newSpeed == player.minSpeed)
+        {
+            normalSelection.Stop();
+            fastSelection.Stop();
 
-        //foreach (Button button in addButtons)
-        //{
-        //    button.interactable = true;
-        //}
+            slowSelection.Play();
+            slowSource.Play();
+        }
+        else if (newSpeed == player.maxSpeed)
+        {
+            normalSelection.Stop();
+            slowSelection.Stop();
 
-        //foreach (Button button in subButtons)
-        //{
-        //    button.interactable = true;
-        //}
+            fastSelection.Play();
+            fastSource.Play();
+        }
+        else
+        {
+            fastSelection.Stop();
+            slowSelection.Stop();
+
+            normalSelection.Play();
+            normalSource.Play();
+        }
     }
 }

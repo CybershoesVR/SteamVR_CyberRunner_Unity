@@ -9,7 +9,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] int gemMaxPitch = 10;
     [SerializeField] float recentGemTime = 1;
 
+    [SerializeField] SteamVR_Action_Boolean resetAction;
+    [SerializeField] SteamVR_Input_Sources resetSource;
+
     private RaceController raceController;
+    private Teleporter teleporter;
 
     private int recentGems = 0;
 
@@ -17,17 +21,27 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         raceController = FindObjectOfType<RaceController>();
+        teleporter = FindObjectOfType<Teleporter>();
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Delete))
+        if (Application.isEditor && Input.GetKeyDown(KeyCode.Delete))
         {
             AchievementManager.DEBUG_ClearAchievement("achievement_00");
             AchievementManager.DEBUG_ClearAchievement("achievement_01");
             AchievementManager.DEBUG_ClearAchievement("achievement_02");
             AchievementManager.DEBUG_ClearAchievement("achievement_03");
             AchievementManager.DEBUG_ClearAchievement("achievement_04");
+            AchievementManager.DEBUG_ClearAchievement("achievement_05");
+            AchievementManager.DEBUG_ClearAchievement("achievement_06");
+            Debug.Log("Achievements Cleared");
+        }
+
+        if (resetAction.GetState(resetSource))
+        {
+            teleporter.Teleport();
+            Invoke("ResetRace", teleporter.fadeDuration);
         }
     }
 
@@ -38,6 +52,11 @@ public class PlayerController : MonoBehaviour
     //        colliderSource.Play();
     //    }
     //}
+
+    void ResetRace()
+    {
+        raceController.ResetRace();
+    }
 
     public int AddGems(int amount)
     {

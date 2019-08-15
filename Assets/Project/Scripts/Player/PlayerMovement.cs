@@ -64,6 +64,11 @@ public class PlayerMovement : MonoBehaviour
     private float rawActionTimer = 11;
     private bool rawActionsEnabled = false;
 
+    [HideInInspector]
+    public int collectedBoosters = 0;
+
+    private float airTime = 0;
+
     #endregion
 
     void Start()
@@ -109,28 +114,34 @@ public class PlayerMovement : MonoBehaviour
         //Step Sounds
         if (isGrounded && rawActionsEnabled)
         {
-            if (moveRawLeftAction.axis.magnitude > 0.7f && !leftFootAudioSource.isPlaying && !leftFootPlayed)
+            if (!rightFootAudioSource.isPlaying)
             {
-                //Debug.Log("Playing Left Foot: " + moveRawLeftAction.axis.magnitude);
+                if (moveRawRightAction.axis.magnitude > 0.7f && !rightFootPlayed)
+                {
+                    //Debug.Log("Right Raw: " + moveRawRightAction.axis.magnitude);
 
-                leftFootAudioSource.Play();
-                leftFootPlayed = true;
+                    rightFootAudioSource.Play();
+                    rightFootPlayed = true;
+                }
+                else if (moveRawRightAction.axis.magnitude < 0.3f)
+                {
+                    rightFootPlayed = false;
+                }
             }
-            else if (moveRawLeftAction.axis.magnitude < 0.3f)
+            
+            if (!leftFootAudioSource.isPlaying)
             {
-                leftFootPlayed = false;
-            }
+                if (moveRawLeftAction.axis.magnitude > 0.7f && !leftFootPlayed)
+                {
+                    //Debug.Log("Playing Left Foot: " + moveRawLeftAction.axis.magnitude);
 
-            if (moveRawRightAction.axis.magnitude > 0.7f && !rightFootAudioSource.isPlaying && !rightFootPlayed)
-            {
-                //Debug.Log("Right Raw: " + moveRawRightAction.axis.magnitude);
-
-                rightFootAudioSource.Play();
-                rightFootPlayed = true;
-            }
-            else if (moveRawRightAction.axis.magnitude < 0.3f)
-            {
-                rightFootPlayed = false;
+                    leftFootAudioSource.Play();
+                    leftFootPlayed = true;
+                }
+                else if (moveRawLeftAction.axis.magnitude < 0.3f)
+                {
+                    leftFootPlayed = false;
+                }
             }
         }
 
@@ -222,11 +233,24 @@ public class PlayerMovement : MonoBehaviour
         {
             isGrounded = true;
             groundContactNormal = hitInfo.normal;
+
+            if (!wasGrounded)
+            {
+                airTime = 0;
+            }
         }
         else
         {
             isGrounded = false;
             groundContactNormal = Vector3.up;
+
+            airTime += Time.deltaTime;
+
+            if (airTime >= 3f)
+            {
+                Debug.Log("Airborn!");
+                AchievementManager.SetAchievement("achievement_06");
+            }
         }
 
         //Disable isJumping on impact
@@ -276,6 +300,8 @@ public class PlayerMovement : MonoBehaviour
         externalImpulse += force;
         impulseTimer = 0;
         impulseDuration = duration;
+
+        collectedBoosters++;
     }
 
     public float SetSpeed(float newSpeed)

@@ -45,6 +45,8 @@ public class RaceController : MonoBehaviour
     private int gems;
     private int maxGems;
 
+    private int marathonRunCounter = 0;
+
     private Gem[] gemObjects;
 
     //private string scoreListPath;
@@ -102,7 +104,7 @@ public class RaceController : MonoBehaviour
             steamLeaderboard.DownloadScores();
         }
 
-        if (Input.GetKeyDown(KeyCode.Return))
+        if (Input.GetKeyDown(KeyCode.Return) && eventActive)
         {
             eventLeaderboard.ClearEmptyPlayers();
 
@@ -124,13 +126,19 @@ public class RaceController : MonoBehaviour
 
     public void StartRace()
     {
+        if (raceActive)
+        {
+            return;
+        }
+
+
         float currentSpeed = player.GetSpeed();
 
-        if (currentSpeed < defaultSpeed)
+        if (currentSpeed < defaultSpeed - 0.1f)
         {
             time = -speedDecreaseBonus;
         }
-        else if (currentSpeed > defaultSpeed)
+        else if (currentSpeed > defaultSpeed + 0.1f)
         {
             time = speedIncreaseMalus;
         }
@@ -150,9 +158,23 @@ public class RaceController : MonoBehaviour
             raceActive = false;
             lastTime = Mathf.Floor(time * 1000) / 1000;
 
-            if (lastTime <= 7)
+            if (lastTime < 16)
             {
-                AchievementManager.SetAchievement("achievement_03");
+                marathonRunCounter++;
+
+                if (marathonRunCounter >= 3)
+                {
+                    AchievementManager.SetAchievement("achievement_04");
+                }
+
+                if (lastTime <= 14)
+                {
+                    AchievementManager.SetAchievement("achievement_03");
+                }
+            }
+            else
+            {
+                marathonRunCounter = 0;
             }
 
             if (lastTime < bestTime)
@@ -201,6 +223,13 @@ public class RaceController : MonoBehaviour
             if (gems <= 0)
             {
                 AchievementManager.SetAchievement("achievement_02");
+
+                if (player.collectedBoosters <= 0)
+                {
+                    AchievementManager.SetAchievement("achievement_05");
+                }
+
+                player.collectedBoosters = 0;
             }
 
             foreach (Gem coin in gemObjects)
@@ -212,6 +241,9 @@ public class RaceController : MonoBehaviour
 
     public void ResetRace()
     {
+        if (!raceActive)
+            return;
+
         time = 0;
         gems = 0;
         raceActive = false;
@@ -352,20 +384,19 @@ public class RaceController : MonoBehaviour
         {
             gems++;
 
-            if (gems >= 50)
+            time -= amount * timePerGem;
+
+            uiTimeText.text = $"{time:#0.000}";
+
+            if (gems >= 30)
             {
                 AchievementManager.SetAchievement("achievement_00");
 
-                if (gems >= maxGems)
+                if (gems >= 60)
                 {
                     AchievementManager.SetAchievement("achievement_01");
                 }
             }
-
-
-            time -= amount * timePerGem;
-
-            uiTimeText.text = $"{time:#0.000}";
         }
     }
 }

@@ -15,7 +15,7 @@ public static class AchievementManager
             
             if (!unlocked)
             {
-                Debug.Log("Unlocking...");
+                Debug.Log($"Unlocking {id}...");
                 SteamUserStats.SetAchievement(id);
                 SteamUserStats.StoreStats();
             }

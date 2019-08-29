@@ -33,8 +33,15 @@ public class SteamManager : MonoBehaviour {
 	private bool m_bInitialized;
 	public static bool Initialized {
 		get {
-			return Instance.m_bInitialized;
-		}
+            if (Instance != null)
+            {
+                return Instance.m_bInitialized;
+            }
+            else
+            {
+                return false;
+            }
+        }
 	}
 
 	private SteamAPIWarningMessageHook_t m_SteamAPIWarningMessageHook;

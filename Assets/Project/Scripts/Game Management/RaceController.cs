@@ -76,7 +76,7 @@ public class RaceController : MonoBehaviour
             eventLeaderboard.ClearEmptyPlayers();
             eventPlayerName = "Runner#1";
             LoadNewPlayerStats();
-            leaderboardTitle.text = eventLeaderboard.EventName;
+            leaderboardTitle.text = eventLeaderboard.eventName;
         }
 
         player = FindObjectOfType<PlayerMovement>();

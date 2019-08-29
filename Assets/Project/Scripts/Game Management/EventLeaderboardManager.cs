@@ -6,8 +6,9 @@ using System.IO;
 public class EventLeaderboardManager : MonoBehaviour
 {
     public int scoreMultiplier = 1000000000;
-    public string EventName = "Gamescom2019";
 
+    [HideInInspector]
+    public string eventName = "Event";
     [HideInInspector]
     public List<LocalScoreEntry> loadedScores;
 
@@ -16,6 +17,7 @@ public class EventLeaderboardManager : MonoBehaviour
     private FileStream stream;
 
     private int leaderboardEntryMax;
+
 
 
     private void OnDisable()
@@ -51,7 +53,7 @@ public class EventLeaderboardManager : MonoBehaviour
 
         UpdateScores();
 
-        string fileText = EventName + "\n";
+        string fileText = eventName + "\n";
 
         for (int i = 0; i < loadedScores.Count; i++)
         {
@@ -70,7 +72,14 @@ public class EventLeaderboardManager : MonoBehaviour
             Directory.CreateDirectory(scoreListPath);
         }
 
-        scoreListPath += $"{EventName}_ScoreList.txt";
+        if (eventName == "Event")
+        {
+            string namePath = $"{Application.streamingAssetsPath}/EventName.txt";
+
+            eventName = File.ReadAllText(namePath);
+        }
+
+        scoreListPath += $"{eventName}_ScoreList.txt";
 
         if (File.Exists(scoreListPath))
         {
@@ -103,14 +112,17 @@ public class EventLeaderboardManager : MonoBehaviour
                 loadedScores.Add(new LocalScoreEntry(lineChunks[1], 0, float.Parse(lineChunks[2]), lineChunks[3]));
             }
 
-            if (loadedScores.Count > 1)
+            if (loadedScores.Count > 0)
             {
                 UpdateScores();
             }
         }
         else
         {
-            File.Create(scoreListPath);
+            //File.Create(scoreListPath);
+
+            File.WriteAllText(scoreListPath, $"{eventName}\n");
+
             loadedScores = null;
         }
     }
@@ -175,7 +187,7 @@ public class EventLeaderboardManager : MonoBehaviour
                 }
             }
 
-            string fileText = EventName + "\n";
+            string fileText = eventName + "\n";
 
             for (int i = 0; i < loadedScores.Count; i++)
             {
@@ -204,7 +216,7 @@ public class EventLeaderboardManager : MonoBehaviour
             {
                 loadedScores[index] = new LocalScoreEntry(loadedScores[index].playerName, loadedScores[index].rank, loadedScores[index].score, addedPlayerScore.email);
 
-                string fileText = EventName + "\n";
+                string fileText = eventName + "\n";
 
                 for (int i = 0; i < loadedScores.Count; i++)
                 {

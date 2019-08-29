@@ -123,7 +123,7 @@ public class PlayerMovement : MonoBehaviour
                     rightFootAudioSource.Play();
                     rightFootPlayed = true;
                 }
-                else if (moveRawRightAction.axis.magnitude < 0.3f)
+                else if (moveRawRightAction.axis.magnitude < 0.4f)
                 {
                     rightFootPlayed = false;
                 }
@@ -138,7 +138,7 @@ public class PlayerMovement : MonoBehaviour
                     leftFootAudioSource.Play();
                     leftFootPlayed = true;
                 }
-                else if (moveRawLeftAction.axis.magnitude < 0.3f)
+                else if (moveRawLeftAction.axis.magnitude < 0.4f)
                 {
                     leftFootPlayed = false;
                 }

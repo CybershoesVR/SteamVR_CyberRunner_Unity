@@ -12,7 +12,7 @@ public static class PlayerForm
         // Enter in the command line arguments, everything you would enter after the executable name itself
         start.Arguments = scoreListPath;
         // Enter the executable to run, including the complete path
-        start.FileName = $"{Application.dataPath}\\PlayerForm\\PlayerForm.exe";
+        start.FileName = $"{Application.streamingAssetsPath}\\PlayerForm\\PlayerForm.exe";
 
         Process playerForm = Process.Start(start);
 

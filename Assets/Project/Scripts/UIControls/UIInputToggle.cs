@@ -12,6 +12,8 @@ public class UIInputToggle : MonoBehaviour
     [SerializeField] UILaserpointer laserPointerLeft;
     [SerializeField] UILaserpointer laserPointerRight;
     [SerializeField] SteamVR_Action_Boolean clickAction;
+    [Space]
+    [SerializeField] float pointerMoveSpeedTreshold = 3; //The speed you can move at before the laserpointer will deactivate
 
     private Rigidbody playerRB;
     private UILaserpointer activeHand;
@@ -47,7 +49,7 @@ public class UIInputToggle : MonoBehaviour
             menuPressed = false;
         }
 
-        if (pointerActive && playerRB.velocity.magnitude > 3)
+        if (pointerActive && playerRB.velocity.magnitude > pointerMoveSpeedTreshold)
         {
             activeHand.ToggleLaser(false);
             pointerActive = false;

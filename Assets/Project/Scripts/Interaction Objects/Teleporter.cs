@@ -7,8 +7,6 @@ using Valve.VR;
 public class Teleporter : MonoBehaviour
 {
     [SerializeField] Transform spawnPoint;
-    //[SerializeField]
-    //Animator effectCanvas;
     public float fadeDuration = 2;
 
     private Transform player;
@@ -21,7 +19,6 @@ public class Teleporter : MonoBehaviour
 
     public void Teleport()
     {
-        //effectCanvas.SetTrigger("Fade");
         SteamVR_Fade.Start(Color.black, fadeDuration);
         Invoke("TpAfterFade", fadeDuration);
     }
@@ -31,7 +28,5 @@ public class Teleporter : MonoBehaviour
         player.position = spawnPoint.position;
 
         SteamVR_Fade.Start(Color.clear, fadeDuration);
-
-        //effectCanvas.SetTrigger("Fade");
     }
 }

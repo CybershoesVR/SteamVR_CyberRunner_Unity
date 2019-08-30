@@ -6,12 +6,13 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Valve.VR;
 
+[RequireComponent(typeof(LineRenderer))]
 public class UILaserpointer : MonoBehaviour
 {
     [SerializeField] float laserLength;
     [SerializeField] LayerMask laserHitMask;
-    [SerializeField] SteamVR_Input_Sources pointerObject;
-    [SerializeField] SteamVR_Action_Boolean ClickAction;
+    [SerializeField] SteamVR_Input_Sources pointerHand;
+    [SerializeField] SteamVR_Action_Boolean clickAction;
 
     private bool active = false;
     private bool triggerPressed = false;
@@ -68,7 +69,7 @@ public class UILaserpointer : MonoBehaviour
             laser.SetPosition(1, laserTarget);
 
 
-            if (ClickAction.GetState(pointerObject))
+            if (clickAction.GetState(pointerHand))
             {
                 if (!triggerPressed && selectedButton != null)
                 {

@@ -7,7 +7,7 @@ public class Gem : MonoBehaviour
     [SerializeField] int value = 1;
 
     private MeshRenderer meshRenderer;
-    private SphereCollider coinCollider;
+    private SphereCollider gemCollider;
     private ParticleSystem collectParticles;
     private AudioSource source;
 
@@ -15,7 +15,7 @@ public class Gem : MonoBehaviour
     void Start()
     {
         meshRenderer = GetComponentInChildren<MeshRenderer>();
-        coinCollider = GetComponent<SphereCollider>();
+        gemCollider = GetComponent<SphereCollider>();
         collectParticles = GetComponentInChildren<ParticleSystem>();
         source = GetComponent<AudioSource>();
     }
@@ -26,18 +26,19 @@ public class Gem : MonoBehaviour
 
         if (player)
         {
-            float pitchOffset = player.AddGems(value);
-            coinCollider.enabled = false;
+            float pitchOffset = player.AddGems(value); //Give Gem to player & find collect pitch
+            source.pitch = 1 + (pitchOffset * 0.05f); //Set pitch
+            source.Play();
+
+            gemCollider.enabled = false;
             meshRenderer.enabled = false;
             collectParticles.Play();
-            source.pitch = 1 + (pitchOffset * 0.05f);
-            source.Play();
         }
     }
 
     public void Respawn()
     {
-        coinCollider.enabled = true;
+        gemCollider.enabled = true;
         meshRenderer.enabled = true;
     }
 }

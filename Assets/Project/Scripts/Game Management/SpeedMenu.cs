@@ -6,12 +6,8 @@ using UnityEngine.UI;
 
 public class SpeedMenu : MonoBehaviour
 {
-    //[SerializeField] TextMeshProUGUI speedDisplayText;
-    //[SerializeField] Button[] addButtons;
-    //[SerializeField] Button[] subButtons;
-    //[SerializeField] Animator normalAnim;
-    //[SerializeField] Animator slowAnim;
-    //[SerializeField] Animator fastAnim;
+    [SerializeField] float minSpeed;
+    [SerializeField] float maxSpeed;
 
     [SerializeField] ParticleSystem normalSelection;
     [SerializeField] ParticleSystem slowSelection;
@@ -33,43 +29,12 @@ public class SpeedMenu : MonoBehaviour
         fastSource = fastSelection.GetComponentInParent<AudioSource>();
     }
 
-    public void AddSpeed(float amount)
-    {
-        float newSpeed = player.AddSpeed(amount);
-
-        //speedDisplayText.text = newSpeed.ToString();
-
-        if (newSpeed == player.minSpeed)
-        {
-            normalSelection.Stop();
-            fastSelection.Stop();
-
-            slowSelection.Play();
-            slowSource.Play();
-        }
-        else if (newSpeed == player.maxSpeed)
-        {
-            normalSelection.Stop();
-            slowSelection.Stop();
-
-            fastSelection.Play();
-            fastSource.Play();
-        }
-        else
-        {
-            fastSelection.Stop();
-            slowSelection.Stop();
-
-            normalSelection.Play();
-            normalSource.Play();
-        }
-    }
-
     public void SetSpeed(float newSpeed)
     {
         player.SetSpeed(newSpeed);
 
-        if (newSpeed == player.minSpeed)
+        //Select Slow
+        if (newSpeed == minSpeed)
         {
             normalSelection.Stop();
             fastSelection.Stop();
@@ -77,7 +42,8 @@ public class SpeedMenu : MonoBehaviour
             slowSelection.Play();
             slowSource.Play();
         }
-        else if (newSpeed == player.maxSpeed)
+        //Select Fast
+        else if (newSpeed == maxSpeed)
         {
             normalSelection.Stop();
             slowSelection.Stop();
@@ -85,6 +51,7 @@ public class SpeedMenu : MonoBehaviour
             fastSelection.Play();
             fastSource.Play();
         }
+        //Select Normal
         else
         {
             fastSelection.Stop();

@@ -12,7 +12,6 @@ public class RaceController : MonoBehaviour
     #region
     [SerializeField] string eventPlayerName;
     [SerializeField] string cachedEmail = "[No Email]";
-    [SerializeField] bool eventActive = false;
 
     [SerializeField] TextMeshProUGUI uiTimeText;
     [SerializeField] RectTransform scoreList;
@@ -59,7 +58,7 @@ public class RaceController : MonoBehaviour
 
     private void Start()
     {
-        if (!eventActive)
+        if (SteamManager.Initialized)
         {
             steamLeaderboard = FindObjectOfType<SteamLeaderboardManager>();
             steamLeaderboard.AssignEntryMax(leaderBoardEntryMax);
@@ -99,12 +98,12 @@ public class RaceController : MonoBehaviour
             uiTimeText.text = $"{time:#0.000}";
         }
 
-        if (Input.GetKeyDown(KeyCode.F5) && !eventActive)
+        if (Input.GetKeyDown(KeyCode.F5) && SteamManager.Initialized)
         {
             steamLeaderboard.DownloadScores();
         }
 
-        if (Input.GetKeyDown(KeyCode.Return) && eventActive)
+        if (Input.GetKeyDown(KeyCode.Return) && !SteamManager.Initialized)
         {
             eventLeaderboard.ClearEmptyPlayers();
 
@@ -193,7 +192,7 @@ public class RaceController : MonoBehaviour
                 highscoreInfo.text = "Personal Best!!!";
 
 
-                if (!eventActive)
+                if (SteamManager.Initialized)
                 {
                     steamLeaderboard.UploadScore(bestTime);
                 }
@@ -207,7 +206,7 @@ public class RaceController : MonoBehaviour
                 highscoreInfo.text = "You can be faster!!!";
             }
 
-            if (!eventActive)
+            if (SteamManager.Initialized)
             {
                 StartCoroutine(LoadSteamLeaderboardStats());
             }

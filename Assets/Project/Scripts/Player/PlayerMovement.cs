@@ -8,75 +8,69 @@ public class PlayerMovement : MonoBehaviour
     //Variables
     #region
 
-    [SerializeField] float moveSpeed = 10; //Keep the values low because of nausea.
-    [SerializeField] float sprintFactor;
-    [SerializeField] float sprintTrigger = 0.7f;
-    public float minSpeed;
-    public float maxSpeed;
-    [SerializeField] float jumpForce; //Needs to be high (~500) depending on desired jump height.
-    [SerializeField] float jumpPush = 5;
-    [SerializeField] float pushDuration = 1;
+    [SerializeField] float moveSpeed;
+    [SerializeField] float sprintFactor; //The Multiplier when sprinting
+    [SerializeField] float sprintTrigger; //The Input Magnitude at which sprinting is triggered
+    [SerializeField] float jumpForce;
     [Space]
-    [SerializeField] CapsuleCollider playerCollider;
+    [SerializeField] CapsuleCollider playerCollider; //Has to be in a child of the player because of scaling, etc.
+    [SerializeField] Transform hmdCamera; //Headset Reference
     [Space]
-    [SerializeField] Transform hmdCamera; //Reference to the Headset Transform
     [SerializeField] SteamVR_Action_Vector2 moveAction;
     [SerializeField] SteamVR_Action_Vector2 moveRawLeftAction;
     [SerializeField] SteamVR_Action_Vector2 moveRawRightAction;
     [SerializeField] SteamVR_Action_Boolean jumpAction;
+    [Space]
     [SerializeField] SteamVR_Input_Sources treadmillSource = SteamVR_Input_Sources.Treadmill;
     [SerializeField] SteamVR_Input_Sources handSource = SteamVR_Input_Sources.LeftHand;
     [Space]
-    //Used for locating ground below the player so they can't jump mid-air.
     [SerializeField] Transform groundCheckStart; //A point at the bottom of the player
     [SerializeField] float groundLinecastLength; //The length of the line emitted from groundCheckStart.
     [SerializeField] LayerMask groundMask; //The layers that are recognized as ground.
-                                           //IMPORTANT: THE PLAYER OR CHILDREN OF THE OBJECT SHOULD NOT BE ASSIGNED A GROUND LAYER (if they have colliders)
-    [SerializeField] AnimationCurve slopeCurveModifier = new AnimationCurve(new Keyframe(-90.0f, 1.0f), new Keyframe(0.0f, 1.0f), new Keyframe(90.0f, 0.0f));
-    //[SerializeField] float slopeRayHeight;
-    //[SerializeField] float maxSlopeSteepness;
-    //[SerializeField] float slopeThreshold = 0.01f;
+    [SerializeField] AnimationCurve slopeCurveModifier = new AnimationCurve(new Keyframe(-90.0f, 1.0f), new Keyframe(0.0f, 1.0f), new Keyframe(90.0f, 0.0f)); //X-Axis = Angle | Y-Axis = Deceleration Multiplier
     [Space]
-    [SerializeField] private SteamVR_Input_Sources currentInputSource;
+    [SerializeField] private SteamVR_Input_Sources currentInputSource; //Movement Source. Switches between either Cybershoes or Left Hand
     [Space]
     [SerializeField] AudioSource leftFootAudioSource;
     [SerializeField] AudioSource rightFootAudioSource;
+    [SerializeField] float stepSoundPlayTreshold = 0.7f;
+    [SerializeField] float stepSoundResetTreshold = 0.4f;
+
+    [HideInInspector]
+    public int collectedBoosters = 0; //Used for achievement. Only counts per Run.
 
     private AudioSource jumpAudioSource;
-    private bool rightFoot = true;
 
-    private Vector3 externalImpulse; //Used for Boost Pads. Fades away as defined by impulseFade.
-    private float impulseTimer;
-    private float impulseDuration;
+    private Vector3 externalImpulse; //Used to apply an impulse from a booster
+    private float impulseTimer; //Tracks the actual current duration of the impulse
+    private float impulseDuration; //Duration of the current Impulse
 
     private Vector3 groundContactNormal;
     private float currentTargetSpeed;
 
     private Rigidbody rb;
     private Transform colliderTransform;
+
     private bool isGrounded = false;
     private bool wasGrounded = false;
     private bool isJumping = false;
 
-    private bool leftFootPlayed = false;
-    private bool rightFootPlayed = false;
+    private bool leftStepPlayed = false;
+    private bool rightStepPlayed = false;
 
-    private float rawActionTimer = 11;
-    private bool rawActionsEnabled = false;
+    private float rawActionTimer = 11; //A timeout before step sounds are enabled.
+                                       //The Raw Left/Right Trackpads in the Driver are only accessible after 11 seconds because of compatibility issues.
+    private bool rawActionsEnabled = false; //Wheter the Raw Trackpads can be read yet.
 
-    [HideInInspector]
-    public int collectedBoosters = 0;
-
-    private float airTime = 0;
+    private float airTime = 0; //Used for achievement.
 
     #endregion
 
     void Start()
     {
-        //currentSource = handSource;
-
         rb = GetComponent<Rigidbody>();
         jumpAudioSource = GetComponent<AudioSource>();
+
         colliderTransform = playerCollider.transform;
 
         StartCoroutine(WaitForRawActions());
@@ -84,73 +78,72 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        FindGround();
+        FindGround(); //Updates isGrounded
 
         //JUMP
         if (jumpAction.GetState(currentInputSource) && isGrounded && !isJumping)
         {
             isJumping = true;
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            //SpeedBoost((hmdCamera.forward - new Vector3(0,hmdCamera.forward.y,0)) * jumpPush, pushDuration);
 
             if (rb.constraints == RigidbodyConstraints.FreezeRotation)
             {
-                jumpAudioSource.Play();
+                jumpAudioSource.Play(); //Don't play Jump sound if player can't move.
             }
         }
     }
 
     void FixedUpdate()
     {
-        //COLLIDER UPDATE
+        //COLLIDER UPDATE (Fit collider to player position)
 
+        //Adjust the collider position to the x & z of the headset
         colliderTransform.position = new Vector3(hmdCamera.position.x, colliderTransform.position.y, hmdCamera.position.z);
+        //Adjust the ground check position to the x & z of the headset
         groundCheckStart.position = new Vector3(hmdCamera.position.x, groundCheckStart.position.y, hmdCamera.position.z);
+        //Adjust the collider height to the headset
         playerCollider.height = Mathf.Clamp(hmdCamera.localPosition.y, playerCollider.radius, 3);
+        //Adjust the collider center to half it's height for an accurate position
         playerCollider.center = new Vector3(0, playerCollider.height / 2);
 
-        //MOVEMENT
+        //STEP SOUNDS
 
-        //Step Sounds
         if (isGrounded && rawActionsEnabled)
         {
             if (!rightFootAudioSource.isPlaying)
             {
-                if (moveRawRightAction.axis.magnitude > 0.7f && !rightFootPlayed)
+                if (moveRawRightAction.axis.magnitude > stepSoundPlayTreshold && !rightStepPlayed)
                 {
-                    //Debug.Log("Right Raw: " + moveRawRightAction.axis.magnitude);
-
                     rightFootAudioSource.Play();
-                    rightFootPlayed = true;
+                    rightStepPlayed = true;
                 }
-                else if (moveRawRightAction.axis.magnitude < 0.4f)
+                else if (moveRawRightAction.axis.magnitude < stepSoundResetTreshold)
                 {
-                    rightFootPlayed = false;
+                    rightStepPlayed = false;
                 }
             }
             
             if (!leftFootAudioSource.isPlaying)
             {
-                if (moveRawLeftAction.axis.magnitude > 0.7f && !leftFootPlayed)
+                if (moveRawLeftAction.axis.magnitude > stepSoundPlayTreshold && !leftStepPlayed)
                 {
-                    //Debug.Log("Playing Left Foot: " + moveRawLeftAction.axis.magnitude);
-
                     leftFootAudioSource.Play();
-                    leftFootPlayed = true;
+                    leftStepPlayed = true;
                 }
-                else if (moveRawLeftAction.axis.magnitude < 0.4f)
+                else if (moveRawLeftAction.axis.magnitude < stepSoundResetTreshold)
                 {
-                    leftFootPlayed = false;
+                    leftStepPlayed = false;
                 }
             }
         }
 
+        //MOVEMENT
 
         float forwardInput = moveAction.GetAxis(currentInputSource).y;
         float sidewaysInput = moveAction.GetAxis(currentInputSource).x;
 
+        //Sprint Check
         float sprintMultiplier = 1;
-
         if (moveAction.axis.magnitude >= sprintTrigger)
         {
             sprintMultiplier = sprintFactor;
@@ -163,26 +156,14 @@ public class PlayerMovement : MonoBehaviour
         Vector3 hmdDirectionForward = hmdCamera.forward - new Vector3(0, hmdCamera.forward.y, 0);
         Vector3 hmdDirectionRight = hmdCamera.right - new Vector3(0, hmdCamera.right.y, 0);
 
-        //Sets the velocity relative to the Headset
-        //Y velocity is assigned to itself to not cancel out gravitation.
-
-        Vector3 newVelocity = hmdDirectionForward * forwardInput + hmdDirectionRight * sidewaysInput;// * (moveSpeed * sprintMultiplier)) + externalImpulse;
-
-        //newVelocity = Vector3.ProjectOnPlane(newVelocity, groundContactNormal).normalized;
-
-        //newVelocity.y = rb.velocity.y + externalImpulse.y;
+        //Calculate the new Velocity
+        Vector3 newVelocity = hmdDirectionForward * forwardInput + hmdDirectionRight * sidewaysInput;
         newVelocity *= (moveSpeed * sprintMultiplier) * SlopeMultiplier();
-
         newVelocity.y = rb.velocity.y;
-
-        //Debug.Log(newVelocity);
-
+        Debug.Log(newVelocity.magnitude);
         rb.velocity = newVelocity;
 
-        //if (rb.velocity.magnitude < currentTargetSpeed)
-        //{
-        //    rb.AddForce(newVelocity, ForceMode.VelocityChange);
-        //}
+        //Increase/Decrease drag on floor/air
 
         if (isGrounded)
         {
@@ -194,20 +175,24 @@ public class PlayerMovement : MonoBehaviour
 
             if (wasGrounded && !isJumping)
             {
-                StickToGroundHelper();
+                StickToGround();
             }
         }
 
+        //Impulse
+
         if (externalImpulse.magnitude > float.Epsilon)
         {
-            rb.velocity += externalImpulse;
-            impulseTimer += Time.fixedDeltaTime / impulseDuration;
-            externalImpulse = Vector3.Lerp(externalImpulse, Vector3.zero, impulseTimer);
+            rb.velocity += externalImpulse; //Add current impulse
+            impulseTimer += Time.fixedDeltaTime / impulseDuration; //Count up the timer
+            externalImpulse = Vector3.Lerp(externalImpulse, Vector3.zero, impulseTimer); //Lerp the impulse towards 0
         }
     }
 
-    private void StickToGroundHelper()
+    private void StickToGround()
     {
+        //If the player is walking on a slope less that 85 degrees the velocity is readjusted along the ground.
+
         RaycastHit hitInfo;
         if (Physics.SphereCast(transform.position, playerCollider.radius * (1.0f - 0.1f), Vector3.down, out hitInfo,
                                ((playerCollider.height / 2f) - playerCollider.radius) +
@@ -248,7 +233,6 @@ public class PlayerMovement : MonoBehaviour
 
             if (airTime >= 3f)
             {
-                Debug.Log("Airborn!");
                 AchievementManager.SetAchievement("achievement_06");
             }
         }
@@ -265,35 +249,6 @@ public class PlayerMovement : MonoBehaviour
         float angle = Vector3.Angle(groundContactNormal, Vector3.up);
         return slopeCurveModifier.Evaluate(angle);
     }
-
-    //bool SlopesFlat(Vector3 pos, Vector3 targetDir, float distance)
-    //{
-    //    Ray slopeRay = new Ray(pos, targetDir); // cast a Ray from the position of our gameObject into our desired direction. Add the slopeRayHeight to the Y parameter.
-
-    //    RaycastHit hit;
-
-    //    if (Physics.Raycast(slopeRay, out hit, distance, groundMask))
-    //    {
-    //        float slopeAngle = Mathf.Deg2Rad * Vector3.Angle(Vector3.up, hit.normal); // Here we get the angle between the Up Vector and the normal of the wall we are checking against: 90 for straight up walls, 0 for flat ground.
-
-    //        float radius = Mathf.Abs(slopeRayHeight / Mathf.Sin(slopeAngle)); // slopeRayHeight is the Y offset from the ground you wish to cast your ray from.
-
-    //        if (slopeAngle >= maxSlopeSteepness * Mathf.Deg2Rad) //You can set "maxSlopeSteepness" to any angle you wish.
-    //        {
-    //            if (hit.distance - playerCollider.radius > Mathf.Abs(Mathf.Cos(slopeAngle) * radius) + slopeThreshold) // Magical Cosine. This is how we find out how near we are to the slope / if we are standing on the slope. as we are casting from the center of the collider we have to remove the collider radius.
-    //                                                                                                             // The slopeThreshold helps kills some bugs. ( e.g. cosine being 0 at 90° walls) 0.01 was a good number for me here
-    //            {
-    //                return true; // return true if we are still far away from the slope
-    //            }
-
-    //            return false; // return false if we are very near / on the slope && the slope is steep
-    //        }
-
-    //        return true; // return true if the slope is not steep
-    //    }
-
-    //    return true; //Return True if no collision is imminent at all
-    //}
 
     public void SpeedBoost(Vector3 force, float duration)
     {
@@ -312,24 +267,6 @@ public class PlayerMovement : MonoBehaviour
 
     public float GetSpeed()
     {
-        return moveSpeed;
-    }
-
-    public float AddSpeed(float amount)
-    {
-        float newSpeed = moveSpeed + amount;
-
-        if (newSpeed < minSpeed)
-        {
-            newSpeed = minSpeed;
-        }
-        else if (newSpeed > maxSpeed)
-        {
-            newSpeed = maxSpeed;
-        }
-
-        moveSpeed = newSpeed;
-
         return moveSpeed;
     }
 

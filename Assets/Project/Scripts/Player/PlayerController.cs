@@ -5,27 +5,34 @@ using Valve.VR;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] AudioSource colliderSource;
-    [SerializeField] int gemMaxPitch = 10;
-    [SerializeField] float recentGemTime = 1;
+    [SerializeField] int gemMaxPitch = 10; //The highest Pitch for the Gem Collection sound before it resets
+    [SerializeField] float recentGemTime = 1; //The time-limit to get a higher pitch when collecting a Gem
 
-    [SerializeField] SteamVR_Action_Boolean resetAction;
-    [SerializeField] SteamVR_Input_Sources resetSource;
+    [SerializeField] SteamVR_Action_Boolean resetAction; //Action for Race Reset
+    [SerializeField] SteamVR_Input_Sources resetSource; //Hand doing the Reset
 
     private RaceController raceController;
     private Teleporter teleporter;
 
-    private int recentGems = 0;
+    private int recentGems = 0; //Gems collected in the current time limit
 
 
     void Start()
     {
+        //Find References
         raceController = FindObjectOfType<RaceController>();
         teleporter = FindObjectOfType<Teleporter>();
     }
 
     private void Update()
     {
+        //On Press, Reset Race
+        if (resetAction.GetState(resetSource))
+        {
+            StartCoroutine(ResetRace());
+        }
+
+        //IN EDITOR press DEL to reset all Achievements for the current Steam Account (Only when Steam is enabled)
         if (Application.isEditor && Input.GetKeyDown(KeyCode.Delete))
         {
             AchievementManager.DEBUG_ClearAchievement("achievement_00");
@@ -37,30 +44,19 @@ public class PlayerController : MonoBehaviour
             AchievementManager.DEBUG_ClearAchievement("achievement_06");
             Debug.Log("Achievements Cleared");
         }
-
-        if (resetAction.GetState(resetSource))
-        {
-            teleporter.Teleport();
-            Invoke("ResetRace", teleporter.fadeDuration);
-        }
     }
 
-    //private void OnCollisionEnter(Collision collision)
-    //{
-    //    if (collision.collider.CompareTag("Wall"))
-    //    {
-    //        colliderSource.Play();
-    //    }
-    //}
-
-    void ResetRace()
+    IEnumerator ResetRace()
     {
+        teleporter.Teleport();
+        yield return new WaitForSeconds(teleporter.fadeDuration);
         raceController.ResetRace();
     }
 
     public int AddGems(int amount)
     {
         raceController.AddGems(amount);
+
 
         if (recentGems > gemMaxPitch)
         {
@@ -74,7 +70,7 @@ public class PlayerController : MonoBehaviour
             Invoke("ResetRecentGems", recentGemTime);
         }
 
-        return recentGems;
+        return recentGems; //The recentGems determine the pitch of the gem collection sound.
     }
 
     void ResetRecentGems()

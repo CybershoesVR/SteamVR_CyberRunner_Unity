@@ -6,7 +6,7 @@ public class SpeedPad : MonoBehaviour
 {
     //Boost is always in the forward direction of the pad
     [SerializeField] float speedMultiplier = 2;
-    [SerializeField] float fadeTime = 2;
+    [SerializeField] float fadeTime = 2; //Fade time of the impulse
 
     private AudioSource source;
 

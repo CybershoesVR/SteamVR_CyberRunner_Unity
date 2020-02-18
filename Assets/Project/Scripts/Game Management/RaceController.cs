@@ -121,6 +121,12 @@ public class RaceController : MonoBehaviour
                 LoadNewPlayerStats();
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.R) && SteamManager.Initialized)
+        {
+            bestTime = 1000000;
+            steamLeaderboard.UploadScore(bestTime);
+        }
     }
 
     public void StartRace()

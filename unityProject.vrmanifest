@@ -2,13 +2,13 @@
   "source": "Unity",
   "applications": [
     {
-      "app_key": "application.generated.unity.cybershoes_developerplayground.exe",
+      "app_key": "application.generated.unity.cyberrunner.exe",
       "launch_type": "url",
       "url": "steam://launch/",
-      "action_manifest_path": "C:\\Users\\Cybershoes1\\Desktop\\Nanda Cyberrun Game\\Cyberrun_Repository\\Cyberrun\\Cybershoes_DeveloperPlayground\\actions.json",
+      "action_manifest_path": "C:\\Users\\Cybershoes1\\Desktop\\Nanda\\CyberRunner\\Cyberrun_Repository\\CyberRunner\\actions.json",
       "strings": {
         "en_us": {
-          "name": "Cybershoes_DeveloperPlayground [Testing]"
+          "name": "Cyberrunner [Testing]"
         }
       }
     }

@@ -125,7 +125,7 @@ public class RaceController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R) && SteamManager.Initialized)
         {
             bestTime = 1000000;
-            steamLeaderboard.UploadScore(bestTime);
+            steamLeaderboard.UploadScore(bestTime,true);
         }
     }
 

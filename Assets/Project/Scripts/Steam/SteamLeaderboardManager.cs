@@ -46,7 +46,7 @@ public class SteamLeaderboardManager : MonoBehaviour
         callResultFindLeaderBoard.Set(steamAPICall, OnFindLeaderboard);
     }
 
-    public bool UploadScore(float score)
+    public bool UploadScore(float score, bool allowLower=false)
     {
         if (currentLeaderboard == null)
             return false;
@@ -56,7 +56,14 @@ public class SteamLeaderboardManager : MonoBehaviour
         int compressedScore = Mathf.RoundToInt(1 / score * scoreMultiplier);
         Debug.Log($"Compressed Score: {compressedScore}");
 
-        SteamAPICall_t steamAPICall = SteamUserStats.UploadLeaderboardScore(currentLeaderboard, ELeaderboardUploadScoreMethod.k_ELeaderboardUploadScoreMethodKeepBest, compressedScore, null, 0);
+        ELeaderboardUploadScoreMethod method = ELeaderboardUploadScoreMethod.k_ELeaderboardUploadScoreMethodKeepBest;
+
+        if (allowLower)
+        {
+            method = ELeaderboardUploadScoreMethod.k_ELeaderboardUploadScoreMethodForceUpdate;
+        }
+
+        SteamAPICall_t steamAPICall = SteamUserStats.UploadLeaderboardScore(currentLeaderboard, method, compressedScore, null, 0);
 
         callResultUploadScore.Set(steamAPICall, OnUploadScore);
 
